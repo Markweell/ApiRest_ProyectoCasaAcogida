@@ -10,6 +10,7 @@ use Slim\Http\Response;
 use Slim\Helper\Set;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use ReallySimpleJWT\Token;
 
 // Routes
 // Grupo de rutas para el API
@@ -58,7 +59,6 @@ function forgotPassword($response, $request, $next) {
         <p> Para confirmar y restablecer su contraseña, por favor haga clic <a href="www.google.es">aquí</a> . 
         Si no has iniciado esta solicitud, ignore este mensaje.</p>
         <p>Saludos</p>";';
-        $mail->AltBody = 'Ha contactado con exito con la web de guias turisticas.';
         $mail->CharSet = 'UTF-8';
         $mail->send();
         $sucessful='Le hemos enviado un mail de confirmación';
@@ -66,7 +66,15 @@ function forgotPassword($response, $request, $next) {
         echo 'Message could not be sent. Mailer Error: ', $mail->ErrorInfo;
     }
     
-    return json_encode($variable->email);
+
+    $userId = 12;
+    $secret = 'Genera1290Token[*';
+    $expiration = time() + 3600;
+    $issuer = 'localhost';
+
+    $token = Token::create($userId, $secret, $expiration, $issuer);
+
+    return json_encode($token);
 }
 
 // function obtenerUsuarios($response, $request, $next) {
