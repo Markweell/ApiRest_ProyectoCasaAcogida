@@ -51,10 +51,15 @@ function forgotPassword($response, $request, $next) {
         $mail->addAddress($variable->email);
 
         $mail->isHTML(true);
-        $mail->Subject = 'Hola Marcos, vamos a resetear su password';
-        $mail->Body    = 'Ha contactado con exito con la web de guias turisticas.';
+        $mail->Subject = 'Hola Marcos, vamos a resetear su contraseña';
+        $mail->Body    = '
+        <p>Hola,</p>
+        <p>Hemos recibido una solicitud de un restablecimiento de contraseña de la cuenta asociada a esta dirección de correo electrónico.</p>
+        <p> Para confirmar y restablecer su contraseña, por favor haga clic <a href="www.google.es">aquí</a> . 
+        Si no has iniciado esta solicitud, ignore este mensaje.</p>
+        <p>Saludos</p>";';
         $mail->AltBody = 'Ha contactado con exito con la web de guias turisticas.';
-
+        $mail->CharSet = 'UTF-8';
         $mail->send();
         $sucessful='Le hemos enviado un mail de confirmación';
     } catch (Exception $e) {
