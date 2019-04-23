@@ -2,12 +2,14 @@
     header("Access-Control-Allow-Origin: *");
     header("Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS");
     header("Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Token");
-// header("Content-Type: application/json");
+    header("Content-Type: application/json");
 require_once "Conexion.php";
 
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Helper\Set;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 // Routes
 // Grupo de rutas para el API
@@ -33,6 +35,32 @@ function forgotPassword($response, $request, $next) {
     // $consulta->execute();
     // return json_encode($consulta->fetchAll(PDO::FETCH_ASSOC));
     $variable = json_decode($response->getBody());
+    $mail = new PHPMailer(true);
+    try {
+        //Server settings
+        $mail->SMTPDebug = 0;                                 // Enable verbose debug output
+        $mail->isSMTP();                                      // Set mailer to use SMTP
+        $mail->Host = 'smtp.gmail.com';                        // Specify main and backup SMTP servers
+        $mail->SMTPAuth = true;                               // Enable SMTP authentication
+        $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+        $mail->Username = "emaildepruebaparaphp@gmail.com";                 // SMTP username
+        $mail->Password = "php1234!";                           // SMTP password
+        $mail->Port = 587;                                    // TCP port to connect to
+
+        $mail->setFrom('emaildepruebaparaphp@gmail.com', 'Sistema');
+        $mail->addAddress($variable->email);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Hola Marcos, vamos a resetear su password';
+        $mail->Body    = 'Ha contactado con exito con la web de guias turisticas.';
+        $mail->AltBody = 'Ha contactado con exito con la web de guias turisticas.';
+
+        $mail->send();
+        $sucessful='Le hemos enviado un mail de confirmación';
+    } catch (Exception $e) {
+        echo 'Message could not be sent. Mailer Error: ', $mail->ErrorInfo;
+    }
+    
     return json_encode($variable->email);
 }
 
