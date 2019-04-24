@@ -2,12 +2,15 @@
     header("Access-Control-Allow-Origin: *");
     header("Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS");
     header("Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Token");
-// header("Content-Type: application/json");
+    header("Content-Type: application/json");
 require_once "Conexion.php";
 
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Helper\Set;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use ReallySimpleJWT\Token;
 
 // Routes
 // Grupo de rutas para el API
@@ -33,7 +36,45 @@ function forgotPassword($response, $request, $next) {
     // $consulta->execute();
     // return json_encode($consulta->fetchAll(PDO::FETCH_ASSOC));
     $variable = json_decode($response->getBody());
-    return json_encode($variable->email);
+    $mail = new PHPMailer(true);
+    try {
+        //Server settings
+        $mail->SMTPDebug = 0;                                 // Enable verbose debug output
+        $mail->isSMTP();                                      // Set mailer to use SMTP
+        $mail->Host = 'smtp.gmail.com';                        // Specify main and backup SMTP servers
+        $mail->SMTPAuth = true;                               // Enable SMTP authentication
+        $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+        $mail->Username = "emaildepruebaparaphp@gmail.com";                 // SMTP username
+        $mail->Password = "php1234!";                           // SMTP password
+        $mail->Port = 587;                                    // TCP port to connect to
+
+        $mail->setFrom('emaildepruebaparaphp@gmail.com', 'Sistema');
+        $mail->addAddress($variable->email);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Hola Marcos, vamos a resetear su contraseña';
+        $mail->Body    = '
+        <p>Hola,</p>
+        <p>Hemos recibido una solicitud de un restablecimiento de contraseña de la cuenta asociada a esta dirección de correo electrónico.</p>
+        <p> Para confirmar y restablecer su contraseña, por favor haga clic <a href="www.google.es">aquí</a> . 
+        Si no has iniciado esta solicitud, ignore este mensaje.</p>
+        <p>Saludos</p>";';
+        $mail->CharSet = 'UTF-8';
+        $mail->send();
+        $sucessful='Le hemos enviado un mail de confirmación';
+    } catch (Exception $e) {
+        echo 'Message could not be sent. Mailer Error: ', $mail->ErrorInfo;
+    }
+    
+
+    $userId = 12;
+    $secret = 'Genera1290Token[*';
+    $expiration = time() + 3600;
+    $issuer = 'localhost';
+
+    $token = Token::create($userId, $secret, $expiration, $issuer);
+
+    return json_encode($token);
 }
 
 // function obtenerUsuarios($response, $request, $next) {
