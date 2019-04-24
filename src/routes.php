@@ -16,7 +16,9 @@ use ReallySimpleJWT\Jwt;
 use ReallySimpleJWT\Validate;
 use ReallySimpleJWT\Encode;
 
+// Constante que vamos a usar para codificar nuestros tokens
 const SECRET = 'Genera1290Token[*';
+
 // Routes
 // Grupo de rutas para el API
 $app->group('/api', function () use ($app) {
@@ -26,23 +28,21 @@ $app->group('/api', function () use ($app) {
         $app->get('/usuarios/{id}', 'obtenerUsuario');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');
+        $app->post('/validateLogin', 'validateLogin');
     });
   });
 
 $app->get('/[{name}]', function (Request $request, Response $response, array $args) {
     // Sample log message
     $this->logger->info("Slim-Skeleton '/' route");
-
     // Render index view
     return $this->renderer->render($response, 'index.phtml', $args);
 });
-
+/**
+ * Recoge un email de una peticion post, se comprueba que este está en la base de datos y si lo está se le genera
+ * un token y se le envia un correo con ese token.
+ */
 function forgotPassword($response, $request, $next) {
-    // $conexion = \Conexion::getConnection();
-    // $consulta = $conexion->prepare('SELECT * FROM usuarios');
-    // $consulta->execute();
-    // return json_encode($consulta->fetchAll(PDO::FETCH_ASSOC));
-
     $variable = json_decode($response->getBody());
     $email = $variable->email;
 
@@ -52,21 +52,13 @@ function forgotPassword($response, $request, $next) {
     $consulta->execute($valores);
     $resultadoBusqueda=$consulta->fetch();
     $idUsuario = $resultadoBusqueda['id'];
-    //return json_encode($resultadoBusqueda['id']);
+    $nombreUsuario = $resultadoBusqueda['nombre'];
 
-    if(!$resultadoBusqueda){
-       return json_encode(false);
-    }
-    
-    $userId = $idUsuario;
-    //$secret = 'Genera1290Token[*';
-    $expiration = time()+15;
-    $issuer = 'localhost';
+    if(!$resultadoBusqueda){return json_encode(false);}
 
-    $token = Token::create($userId, SECRET, $expiration, $issuer);
+    $token = generateToken($idUsuario);
 
-    $asunto= 'Hola Marcos, vamos a resetear su contraseña';
-
+    $asunto= 'Hola '.$nombreUsuario.', vamos a resetear su contraseña';
     $body = '<p>Hola,</p>
     <p>Hemos recibido una solicitud de un restablecimiento de contraseña de la cuenta asociada a esta dirección de 
     correo electrónico.</p>
@@ -80,6 +72,24 @@ function forgotPassword($response, $request, $next) {
     return json_encode(sendEmail($email, $asunto, $body));
 }
 
+/**
+ * Genera un token en el que encriptamos un idUsuario
+ * @param int $idUsuario: id del Usuario al que le vamos a generar el token.
+ */
+function generateToken($idUsuario){
+    $userId = $idUsuario;
+    $expiration = time()+3600;
+    $issuer = 'localhost';
+    return Token::create($userId, SECRET, $expiration, $issuer);
+}
+
+/**
+ * Envia un email con asunto y una descripción
+ * @param string email: email al que se va a enviar el correo,
+ * @param string remitente: nombre de la persona que va a recibir el correo,
+ * @param string asunto: asunto del email que se va a enviar,
+ * @param string body: cuerpo del email que se va a enviar
+ */
 function sendEmail($email, $asunto, $body){
     $mail = new PHPMailer(true);
     try {
@@ -107,6 +117,9 @@ function sendEmail($email, $asunto, $body){
     }
 }
 
+/**
+ * Recibe un token de una petición post y lo valida.
+ */
 function validateToken($response, $request, $next){
     $resp = json_decode($response->getBody());
     $token = $resp->token;
@@ -115,39 +128,72 @@ function validateToken($response, $request, $next){
     return json_encode($comprobacionToken);
 }
 
+/**
+ * Recibe un token y una contraseña de una petición post y si el token es válido y no ha expirado,
+ * modifica la contraseña del usuario cuyo id se encuentra en el token.
+ */
 function changePassword($response, $request, $next){
     $resp = json_decode($response->getBody());
-    $token = $resp->token;
-
-
-    $userId = 10;
-    //$secret = 'Genera1290Token[*';
-    $expiration = time()+3600;
-    $issuer = 'localhost';
-
-    $token = Token::create($userId, SECRET, $expiration, $issuer);
+    $token = $resp->token;              
+    $password = $resp->password;
 
     $comprobacionToken = validarToken($token);
+
     if(!$comprobacionToken)
         return json_encode(false);
     
+    $idUsuario = getIdOfToken($token);
+   
+    $conexion = \Conexion::getConnection();
+    $valores = [":id"=>$idUsuario, ":password"=>$password];
+    $consulta = $conexion->prepare('UPDATE usuarios SET password=:password where id = :id');
+    $resultadoUpdate= $consulta->execute($valores);
+
+    return json_encode($resultadoUpdate);
+}
+
+/**
+ * Se encarga de validar un token proporcionado
+ * @param string $token: se trata del token a validar.
+ */
+function validarToken($token){
+    return  Token::validate($token, SECRET);
+}
+
+/**
+ * Extrae el id del usuario de un token proporcionado
+ * @param string $token: token a porporcionar.
+ */
+function getIdOfToken($token){
     $jwt= new Jwt($token, SECRET);
     $parse = new Parse ($jwt,new Validate(), new Encode());
     $parsed = $parse->validate()
     ->validateExpiration()
     ->parse();
 
-    // // Return the token header claims as an associative array.
-    // $parsed->getHeader();
-
-    // // Return the token payload claims as an associative array.
-    // $parsed->getPayload();
-    return json_encode($parsed->getPayload()['user_id']);
-
+    return $parsed->getPayload()['user_id'];
 }
 
-function validarToken($token){
-    return  Token::validate($token, SECRET);
+/**
+ * Recibe una petición post con un email y una password, comprueba que existen en la base de datos y
+ * en el caso de que existan, devuelve una json con id, nombre y token generado en base al id del usuario 
+ */
+function validateLogin($response, $request, $next){
+    $resp = json_decode($response->getBody());
+    $email = $resp->email;              
+    $password = $resp->password;
+
+    $conexion = \Conexion::getConnection();
+    $valores = [":email"=>$email, ":password"=>$password];
+    $consulta = $conexion->prepare('SELECT * FROM usuarios where email = :email and password = :password');
+    $consulta->execute($valores);
+    $resultadoBusqueda=$consulta->fetch();
+    if(!$resultadoBusqueda){return json_encode(false);}
+    $idUsuario = $resultadoBusqueda['id'];
+    $nombreUsuario = $resultadoBusqueda['nombre'];
+
+    $token = generateToken($idUsuario);
+    return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
 }
 
 // function obtenerUsuarios($response, $request, $next) {
