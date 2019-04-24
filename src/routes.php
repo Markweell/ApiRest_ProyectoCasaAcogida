@@ -117,17 +117,11 @@ function validateToken($response, $request, $next){
 
 function changePassword($response, $request, $next){
     $resp = json_decode($response->getBody());
-    $token = $resp->token;
-
-
-    $userId = 10;
-    //$secret = 'Genera1290Token[*';
-    $expiration = time()+3600;
-    $issuer = 'localhost';
-
-    $token = Token::create($userId, SECRET, $expiration, $issuer);
+    $token = $resp->token;              
+    $password = $resp->password;
 
     $comprobacionToken = validarToken($token);
+
     if(!$comprobacionToken)
         return json_encode(false);
     
@@ -137,12 +131,14 @@ function changePassword($response, $request, $next){
     ->validateExpiration()
     ->parse();
 
-    // // Return the token header claims as an associative array.
-    // $parsed->getHeader();
+    $id = $parsed->getPayload()['user_id'];
 
-    // // Return the token payload claims as an associative array.
-    // $parsed->getPayload();
-    return json_encode($parsed->getPayload()['user_id']);
+    $conexion = \Conexion::getConnection();
+    $valores = [":id"=>$id, ":password"=>$password];
+    $consulta = $conexion->prepare('UPDATE usuarios SET password=:password where id = :id');
+    $resultadoUpdate= $consulta->execute($valores);
+
+    return json_encode($resultadoUpdate);
 
 }
 
