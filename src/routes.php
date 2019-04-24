@@ -28,6 +28,7 @@ $app->group('/api', function () use ($app) {
         $app->get('/usuarios/{id}', 'obtenerUsuario');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');
+        $app->post('/validateLogin', 'validateLogin');
     });
   });
 
@@ -171,6 +172,28 @@ function getIdOfToken($token){
     ->parse();
 
     return $parsed->getPayload()['user_id'];
+}
+
+/**
+ * Recibe una petición post con un email y una password, comprueba que existen en la base de datos y
+ * en el caso de que existan, devuelve una json con id, nombre y token generado en base al id del usuario 
+ */
+function validateLogin($response, $request, $next){
+    $resp = json_decode($response->getBody());
+    $email = $resp->email;              
+    $password = $resp->password;
+
+    $conexion = \Conexion::getConnection();
+    $valores = [":email"=>$email, ":password"=>$password];
+    $consulta = $conexion->prepare('SELECT * FROM usuarios where email = :email and password = :password');
+    $consulta->execute($valores);
+    $resultadoBusqueda=$consulta->fetch();
+    if(!$resultadoBusqueda){return json_encode(false);}
+    $idUsuario = $resultadoBusqueda['id'];
+    $nombreUsuario = $resultadoBusqueda['nombre'];
+
+    $token = generateToken($idUsuario);
+    return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
 }
 
 // function obtenerUsuarios($response, $request, $next) {
