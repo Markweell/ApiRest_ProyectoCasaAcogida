@@ -11,7 +11,12 @@ use Slim\Helper\Set;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use ReallySimpleJWT\Token;
+use ReallySimpleJWT\Parse;
+use ReallySimpleJWT\Jwt;
+use ReallySimpleJWT\Validate;
+use ReallySimpleJWT\Encode;
 
+const SECRET = 'Genera1290Token[*';
 // Routes
 // Grupo de rutas para el API
 $app->group('/api', function () use ($app) {
@@ -19,6 +24,8 @@ $app->group('/api', function () use ($app) {
     $app->group('/v1', function () use ($app) {
         $app->post('/forgotPassword', 'forgotPassword');
         $app->get('/usuarios/{id}', 'obtenerUsuario');
+        $app->post('/validateToken', 'validateToken');
+        $app->post('/changePassword', 'changePassword');
     });
   });
 
@@ -35,46 +42,112 @@ function forgotPassword($response, $request, $next) {
     // $consulta = $conexion->prepare('SELECT * FROM usuarios');
     // $consulta->execute();
     // return json_encode($consulta->fetchAll(PDO::FETCH_ASSOC));
+
     $variable = json_decode($response->getBody());
+    $email = $variable->email;
+
+    $conexion = \Conexion::getConnection();
+    $valores = [":email"=>$email];
+    $consulta = $conexion->prepare('SELECT * FROM usuarios where email = :email');
+    $consulta->execute($valores);
+    $resultadoBusqueda=$consulta->fetch();
+    $idUsuario = $resultadoBusqueda['id'];
+    //return json_encode($resultadoBusqueda['id']);
+
+    if(!$resultadoBusqueda){
+       return json_encode(false);
+    }
+    
+    $userId = $idUsuario;
+    //$secret = 'Genera1290Token[*';
+    $expiration = time()+15;
+    $issuer = 'localhost';
+
+    $token = Token::create($userId, SECRET, $expiration, $issuer);
+
+    $asunto= 'Hola Marcos, vamos a resetear su contraseña';
+
+    $body = '<p>Hola,</p>
+    <p>Hemos recibido una solicitud de un restablecimiento de contraseña de la cuenta asociada a esta dirección de 
+    correo electrónico.</p>
+    <p> Para confirmar y restablecer su contraseña, por favor haga click
+    <a href="http://localhost:4200/change_password/'.$token.'">aquí</a> 
+    o accede a esta dirección 
+    <a href="http://localhost:4200/change_password/'.$token.'">http://localhost:4200/change_password/'.$token.'</a>. 
+    Si no has iniciado esta solicitud, ignore este mensaje.</p>
+    <p>Saludos</p>';
+    
+    return json_encode(sendEmail($email, $asunto, $body));
+}
+
+function sendEmail($email, $asunto, $body){
     $mail = new PHPMailer(true);
     try {
         //Server settings
         $mail->SMTPDebug = 0;                                 // Enable verbose debug output
         $mail->isSMTP();                                      // Set mailer to use SMTP
-        $mail->Host = 'smtp.gmail.com';                        // Specify main and backup SMTP servers
+        $mail->Host = 'smtp.gmail.com';                       // Specify main and backup SMTP servers
         $mail->SMTPAuth = true;                               // Enable SMTP authentication
         $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
-        $mail->Username = "emaildepruebaparaphp@gmail.com";                 // SMTP username
-        $mail->Password = "php1234!";                           // SMTP password
+        $mail->Username = "emaildepruebaparaphp@gmail.com";   // SMTP username
+        $mail->Password = "php1234!";                         // SMTP password
         $mail->Port = 587;                                    // TCP port to connect to
 
         $mail->setFrom('emaildepruebaparaphp@gmail.com', 'Sistema');
-        $mail->addAddress($variable->email);
+        $mail->addAddress($email);
 
         $mail->isHTML(true);
-        $mail->Subject = 'Hola Marcos, vamos a resetear su contraseña';
-        $mail->Body    = '
-        <p>Hola,</p>
-        <p>Hemos recibido una solicitud de un restablecimiento de contraseña de la cuenta asociada a esta dirección de correo electrónico.</p>
-        <p> Para confirmar y restablecer su contraseña, por favor haga clic <a href="www.google.es">aquí</a> . 
-        Si no has iniciado esta solicitud, ignore este mensaje.</p>
-        <p>Saludos</p>";';
+        $mail->Subject = $asunto;
+        $mail->Body    = $body;
         $mail->CharSet = 'UTF-8';
         $mail->send();
-        $sucessful='Le hemos enviado un mail de confirmación';
+        return true;
     } catch (Exception $e) {
-        echo 'Message could not be sent. Mailer Error: ', $mail->ErrorInfo;
+        return false;
     }
-    
+}
 
-    $userId = 12;
-    $secret = 'Genera1290Token[*';
-    $expiration = time() + 3600;
+function validateToken($response, $request, $next){
+    $resp = json_decode($response->getBody());
+    $token = $resp->token;
+
+    $comprobacionToken = validarToken($token);
+    return json_encode($comprobacionToken);
+}
+
+function changePassword($response, $request, $next){
+    $resp = json_decode($response->getBody());
+    $token = $resp->token;
+
+
+    $userId = 10;
+    //$secret = 'Genera1290Token[*';
+    $expiration = time()+3600;
     $issuer = 'localhost';
 
-    $token = Token::create($userId, $secret, $expiration, $issuer);
+    $token = Token::create($userId, SECRET, $expiration, $issuer);
 
-    return json_encode($token);
+    $comprobacionToken = validarToken($token);
+    if(!$comprobacionToken)
+        return json_encode(false);
+    
+    $jwt= new Jwt($token, SECRET);
+    $parse = new Parse ($jwt,new Validate(), new Encode());
+    $parsed = $parse->validate()
+    ->validateExpiration()
+    ->parse();
+
+    // // Return the token header claims as an associative array.
+    // $parsed->getHeader();
+
+    // // Return the token payload claims as an associative array.
+    // $parsed->getPayload();
+    return json_encode($parsed->getPayload()['user_id']);
+
+}
+
+function validarToken($token){
+    return  Token::validate($token, SECRET);
 }
 
 // function obtenerUsuarios($response, $request, $next) {
