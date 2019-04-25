@@ -1,23 +1,15 @@
 <?php
-    header("Access-Control-Allow-Origin: *");
-    header("Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS");
-    header("Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Token");
-    header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Token");
+header("Content-Type: application/json");
+
 require_once "Conexion.php";
+require_once "functions.php";
 
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Helper\Set;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-use ReallySimpleJWT\Token;
-use ReallySimpleJWT\Parse;
-use ReallySimpleJWT\Jwt;
-use ReallySimpleJWT\Validate;
-use ReallySimpleJWT\Encode;
-
-// Constante que vamos a usar para codificar nuestros tokens
-const SECRET = 'Genera1290Token[*';
 
 // Routes
 // Grupo de rutas para el API
@@ -25,7 +17,6 @@ $app->group('/api', function () use ($app) {
     // Version group
     $app->group('/v1', function () use ($app) {
         $app->post('/forgotPassword', 'forgotPassword');
-        $app->get('/usuarios/{id}', 'obtenerUsuario');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');
         $app->post('/validateLogin', 'validateLogin');
@@ -38,6 +29,7 @@ $app->get('/[{name}]', function (Request $request, Response $response, array $ar
     // Render index view
     return $this->renderer->render($response, 'index.phtml', $args);
 });
+
 /**
  * Recoge un email de una peticion post, se comprueba que este está en la base de datos y si lo está se le genera
  * un token y se le envia un correo con ese token.
@@ -60,64 +52,17 @@ function forgotPassword($response, $request, $next) {
     $token = generateToken($idUsuario);
 
     $asunto= 'Hola '.$nombreUsuario.', vamos a resetear su contraseña';
-    $body = '<p>Hola,</p>
+    $body = '<p>Hola, ' .$nombreUsuario.'</p>
     <p>Hemos recibido una solicitud de un restablecimiento de contraseña de la cuenta asociada a esta dirección de 
     correo electrónico.</p>
     <p> Para confirmar y restablecer su contraseña, por favor haga click
     <a href="http://localhost:4200/change_password/'.$token.'">aquí</a> 
-    o accede a esta dirección 
+    o accede a la siguiente dirección: 
     <a href="http://localhost:4200/change_password/'.$token.'">http://localhost:4200/change_password/'.$token.'</a>. 
     Si no has iniciado esta solicitud, ignore este mensaje.</p>
     <p>Saludos</p>';
     
     return json_encode(sendEmail($email, $asunto, $body));
-}
-
-/**
- * Genera un token en el que encriptamos un idUsuario
- * @param int $idUsuario: id del Usuario al que le vamos a generar el token.
- */
-function generateToken($idUsuario){
-    $userId = $idUsuario;
-  
-    $expiration = time()+30;
-
-    $issuer = 'localhost';
-    return Token::create($userId, SECRET, $expiration, $issuer);
-}
-
-/**
- * Envia un email con asunto y una descripción
- * @param string email: email al que se va a enviar el correo,
- * @param string remitente: nombre de la persona que va a recibir el correo,
- * @param string asunto: asunto del email que se va a enviar,
- * @param string body: cuerpo del email que se va a enviar
- */
-function sendEmail($email, $asunto, $body){
-    $mail = new PHPMailer(true);
-    try {
-        //Server settings
-        $mail->SMTPDebug = 0;                                 // Enable verbose debug output
-        $mail->isSMTP();                                      // Set mailer to use SMTP
-        $mail->Host = 'smtp.gmail.com';                       // Specify main and backup SMTP servers
-        $mail->SMTPAuth = true;                               // Enable SMTP authentication
-        $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
-        $mail->Username = "emaildepruebaparaphp@gmail.com";   // SMTP username
-        $mail->Password = "php1234!";                         // SMTP password
-        $mail->Port = 587;                                    // TCP port to connect to
-
-        $mail->setFrom('emaildepruebaparaphp@gmail.com', 'Sistema');
-        $mail->addAddress($email);
-
-        $mail->isHTML(true);
-        $mail->Subject = $asunto;
-        $mail->Body    = $body;
-        $mail->CharSet = 'UTF-8';
-        $mail->send();
-        return true;
-    } catch (Exception $e) {
-        return false;
-    }
 }
 
 /**
@@ -166,28 +111,6 @@ function changePassword($response, $request, $next){
 }
 
 /**
- * Se encarga de validar un token proporcionado
- * @param string $token: se trata del token a validar.
- */
-function validarToken($token){
-    return  Token::validate($token, SECRET);
-}
-
-/**
- * Extrae el id del usuario de un token proporcionado
- * @param string $token: token a porporcionar.
- */
-function getIdOfToken($token){
-    $jwt= new Jwt($token, SECRET);
-    $parse = new Parse ($jwt,new Validate(), new Encode());
-    $parsed = $parse->validate()
-    ->validateExpiration()
-    ->parse();
-
-    return $parsed->getPayload()['user_id'];
-}
-
-/**
  * Recibe una petición post con un email y una password, comprueba que existen en la base de datos y
  * en el caso de que existan, devuelve una json con id, nombre y token generado en base al id del usuario 
  */
@@ -225,10 +148,6 @@ function validateLogin($response, $request, $next){
 
     $token = generateToken($idUsuario);
     return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
-}
-
-function encrypt_password($password){
-    return password_hash($password, PASSWORD_ARGON2I);
 }
 
 
