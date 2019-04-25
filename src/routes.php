@@ -54,8 +54,9 @@ function forgotPassword($response, $request, $next) {
     $idUsuario = $resultadoBusqueda['id'];
     $nombreUsuario = $resultadoBusqueda['nombre'];
 
-    if(!$resultadoBusqueda){return json_encode(false);}
-
+    if(!$resultadoBusqueda)
+        return json_encode(false);
+  
     $token = generateToken($idUsuario);
 
     $asunto= 'Hola '.$nombreUsuario.', vamos a resetear su contraseña';
@@ -78,7 +79,9 @@ function forgotPassword($response, $request, $next) {
  */
 function generateToken($idUsuario){
     $userId = $idUsuario;
-    $expiration = time()+3600;
+  
+    $expiration = time()+30;
+
     $issuer = 'localhost';
     return Token::create($userId, SECRET, $expiration, $issuer);
 }
@@ -134,22 +137,32 @@ function validateToken($response, $request, $next){
  */
 function changePassword($response, $request, $next){
     $resp = json_decode($response->getBody());
-    $token = $resp->token;              
+
+    $token = $resp->token;
+
+    //Comentar si vamos a encriptar la contraseña
     $password = $resp->password;
 
+    //Descomentar si vamos a encriptar la contraseña
+    //$password = encrypt_password($resp->password);
+    
     $comprobacionToken = validarToken($token);
 
     if(!$comprobacionToken)
-        return json_encode(false);
+        return json_encode(["status"=>"TOKEN_EXPIRED"]);
+
     
     $idUsuario = getIdOfToken($token);
    
     $conexion = \Conexion::getConnection();
     $valores = [":id"=>$idUsuario, ":password"=>$password];
     $consulta = $conexion->prepare('UPDATE usuarios SET password=:password where id = :id');
-    $resultadoUpdate= $consulta->execute($valores);
 
-    return json_encode($resultadoUpdate);
+    
+    if($consulta->execute($valores))
+        return json_encode(["status"=>"PASSWORD_CHANGED"]);
+    return json_encode(["status"=>"PASSWORD_ERROR"]);
+
 }
 
 /**
@@ -184,17 +197,40 @@ function validateLogin($response, $request, $next){
     $password = $resp->password;
 
     $conexion = \Conexion::getConnection();
+
+    //Comentar si usamos contraseña encriptada
     $valores = [":email"=>$email, ":password"=>$password];
+
+    //Descomentar si usamos contraseña encriptada
+    // $valores = [":email"=>$email];
+
+    //Comentar si usamos contraseña encriptada
     $consulta = $conexion->prepare('SELECT * FROM usuarios where email = :email and password = :password');
+
+    //Descomentar si usamos contraseña encriptada
+    // $consulta = $conexion->prepare('SELECT * FROM usuarios where email = :email');
+
     $consulta->execute($valores);
     $resultadoBusqueda=$consulta->fetch();
-    if(!$resultadoBusqueda){return json_encode(false);}
+
+    if(!$resultadoBusqueda)
+        return json_encode(false);
+    
+    //Descomentar si usamos contraseña encriptada
+    // if(!password_verify($password,$resultadoBusqueda["password"]))
+    //     return json_encode(false);
+
     $idUsuario = $resultadoBusqueda['id'];
     $nombreUsuario = $resultadoBusqueda['nombre'];
 
     $token = generateToken($idUsuario);
     return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
 }
+
+function encrypt_password($password){
+    return password_hash($password, PASSWORD_ARGON2I);
+}
+
 
 // function obtenerUsuarios($response, $request, $next) {
 //     $sql = "SELECT * FROM usuarios";
