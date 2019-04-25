@@ -56,7 +56,7 @@ function forgotPassword($response, $request, $next) {
 
     if(!$resultadoBusqueda)
         return json_encode(false);
-
+  
     $token = generateToken($idUsuario);
 
     $asunto= 'Hola '.$nombreUsuario.', vamos a resetear su contraseña';
@@ -79,7 +79,9 @@ function forgotPassword($response, $request, $next) {
  */
 function generateToken($idUsuario){
     $userId = $idUsuario;
+  
     $expiration = time()+30;
+
     $issuer = 'localhost';
     return Token::create($userId, SECRET, $expiration, $issuer);
 }
@@ -135,6 +137,7 @@ function validateToken($response, $request, $next){
  */
 function changePassword($response, $request, $next){
     $resp = json_decode($response->getBody());
+
     $token = $resp->token;
 
     //Comentar si vamos a encriptar la contraseña
@@ -147,16 +150,19 @@ function changePassword($response, $request, $next){
 
     if(!$comprobacionToken)
         return json_encode(["status"=>"TOKEN_EXPIRED"]);
+
     
     $idUsuario = getIdOfToken($token);
    
     $conexion = \Conexion::getConnection();
     $valores = [":id"=>$idUsuario, ":password"=>$password];
     $consulta = $conexion->prepare('UPDATE usuarios SET password=:password where id = :id');
+
     
     if($consulta->execute($valores))
         return json_encode(["status"=>"PASSWORD_CHANGED"]);
     return json_encode(["status"=>"PASSWORD_ERROR"]);
+
 }
 
 /**
@@ -189,6 +195,7 @@ function validateLogin($response, $request, $next){
     $resp = json_decode($response->getBody());
     $email = $resp->email;              
     $password = $resp->password;
+
     $conexion = \Conexion::getConnection();
 
     //Comentar si usamos contraseña encriptada

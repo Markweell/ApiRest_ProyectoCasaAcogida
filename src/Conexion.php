@@ -5,9 +5,8 @@
 
 class Conexion 
 { 
-
     public static $conexion; 
-
+    
     public static function getConnection() 
     { 
         include "config.php"; 
