@@ -71,8 +71,8 @@ function forgotPassword($response, $request, $next) {
 function validateToken($response, $request, $next){
     $resp = json_decode($response->getBody());
     $token = $resp->token;
-
     $comprobacionToken = validarToken($token);
+    
     return json_encode($comprobacionToken);
 }
 
@@ -147,7 +147,8 @@ function validateLogin($response, $request, $next){
     $nombreUsuario = $resultadoBusqueda['nombre'];
 
     $token = generateToken($idUsuario);
-    return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
+    return json_encode($token);
+    // return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
 }
 
 
