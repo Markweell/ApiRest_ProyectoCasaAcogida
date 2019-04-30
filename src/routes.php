@@ -145,8 +145,9 @@ function validateLogin($response, $request, $next){
 
     $idUsuario = $resultadoBusqueda['id'];
     $nombreUsuario = $resultadoBusqueda['nombre'];
+    $perfil = $resultadoBusqueda['perfil'];
 
-    $token = generateToken($idUsuario);
+    $token = generateTokenLogin($idUsuario, $nombreUsuario, $perfil);
     return json_encode($token);
     // return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
 }

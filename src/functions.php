@@ -20,6 +20,23 @@ function generateToken($idUsuario){
 }
 
 /**
+ * Genera un token para la sesión del usuario
+ * @param int $idUsuario: id del Usuario al que le vamos a generar el token.
+ */
+function generateTokenLogin($userId, $username, $userProfile){
+    $payload = [
+        'user_id' => $userId,
+        'user_name' => $username,
+        'profile' => $userProfile,
+        'iat' => time(),
+        'exp' => time() + EXPIRE_TIME,
+        'iss' => 'server'
+    ];
+    
+    return Token::customPayload($payload, SECRET);
+}
+
+/**
  * Encripta una contraseña pasada por parámtro
  * @param $password: contraseña a encriptar
  */
