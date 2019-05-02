@@ -99,3 +99,39 @@ function sendEmail($email, $asunto, $body){
         return false;
     }
 }
+function decodeBase64Image($Base64Img, $id){
+
+//eliminamos data:image/png; y base64, de la cadena que tenemos
+//hay otras formas de hacerlo                
+$extension = getExtension(substr($Base64Img, 11,1));   
+list(, $Base64Img) = explode(';', $Base64Img);
+list(, $Base64Img) = explode(',', $Base64Img);
+//Decodificamos $Base64Img codificada en base64.
+$Base64Img = base64_decode($Base64Img);
+//escribimos la información obtenida en un archivo llamado 
+//unodepiera.png para que se cree la imagen correctamente
+
+
+file_put_contents('image/imagenPerfil'.$id.'.'.$extension, $Base64Img);
+}
+function getExtension($letra){
+    switch($letra){
+        case 'j':
+            return 'jpg';
+        case 'p':
+            return 'png';
+        case 'g':
+            return 'gif';
+        case 'w': 
+            return 'webp';
+    }
+}
+function comprobarToken(){
+    return getallheaders()['token'];
+}
+function getLastIdFichaPersonal($conexion){
+    $res=$conexion->prepare("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'api_proyecto_php' AND TABLE_NAME = 'ficha_personal'");
+    $res->execute();
+    $rows = $res->fetch();
+    return $rows['AUTO_INCREMENT'];
+}

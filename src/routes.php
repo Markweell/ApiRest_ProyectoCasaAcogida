@@ -1,7 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Token");
+header("Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, token");
 header("Content-Type: application/json");
 
 require_once "Conexion.php";
@@ -16,10 +16,12 @@ use Slim\Helper\Set;
 $app->group('/api', function () use ($app) {
     // Version group
     $app->group('/v1', function () use ($app) {
+        $app->get('/obtenerFichasPersonales', 'obtenerFichasPersonales');
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');
         $app->post('/validateLogin', 'validateLogin');
+        $app->post('/agregarFichaPersonal','agregarFichaPersonal');
     });
   });
 
@@ -139,7 +141,7 @@ function validateLogin($response, $request, $next){
     if(!$resultadoBusqueda)
         return json_encode(false);
     
-    //Descomentar si usamos contraseña encriptada
+    // Descomentar si usamos contraseña encriptada
     // if(!password_verify($password,$resultadoBusqueda["password"]))
     //     return json_encode(false);
 
@@ -152,7 +154,57 @@ function validateLogin($response, $request, $next){
     // return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
 }
 
+function agregarFichaPersonal($response, $request, $next){
+    
+    $resp = json_decode($response->getBody());
+    $nombre = $resp->nombre;              
+    $apellidos = $resp->apellidos;
+    $dni = $resp->dni;
+    $image = $resp->image;
+    $fechaEntrada = $resp->fechaEntrada;
+    $conexion = \Conexion::getConnection();
+    $id_Ficha_Personal = getLastIdFichaPersonal($conexion);
 
+    if($image==''){
+        $urlImagen = 'http://localhost/api/public/image/StandarProfile.png';
+    }else{
+        echo $image;
+        decodeBase64Image($image, $id_Ficha_Personal);
+
+        $urlImagen = 'http://localhost/api/public/image/imagenPerfil'.$id_Ficha_Personal.'.'.getExtension(substr($image, 11,1));
+        
+    }
+    
+    $valores = [":nombre"=>$nombre, ":apellidos"=>$apellidos,":dni"=>$dni,":image"=>$urlImagen];
+    
+    
+    $consulta = $conexion->prepare('INSERT INTO ficha_personal(id, nombre, apellidos, dni, image) 
+    VALUES (NULL, :nombre, :apellidos, :dni, :image)');
+    $consulta->execute($valores);
+
+    
+    $valoresFecha = [":fechaEntrada"=>$fechaEntrada, ":idFichaPersonal"=>$id_Ficha_Personal];
+    $consulta = $conexion->prepare('INSERT INTO fecha_registro (fecha_entrada, id_ficha_personal) 
+    VALUES (:fechaEntrada, :idFichaPersonal)');
+    $resultado = $consulta->execute($valoresFecha);
+
+    return json_encode($resultado);
+
+}
+function obtenerFichasPersonales($response, $request, $next){
+    $conexion = \Conexion::getConnection();
+    $consulta = $conexion->prepare('SELECT * FROM ficha_personal');
+    $consulta->execute();
+    $resultadoBusqueda=$consulta->fetch();
+    return json_encode($resultadoBusqueda);
+}
+
+function obtenerFichasPersonalesPorFecha($response, $request, $next){
+
+}
+function obtenerFichaPersonal($response, $request, $next){
+
+}
 // function obtenerUsuarios($response, $request, $next) {
 //     $sql = "SELECT * FROM usuarios";
 //     // if(getallheaders()['Token']!="sucess"){
