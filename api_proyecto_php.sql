@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 02-05-2019 a las 19:33:47
+-- Tiempo de generación: 02-05-2019 a las 22:03:24
 -- Versión del servidor: 10.1.37-MariaDB
 -- Versión de PHP: 7.2.12
 
@@ -31,15 +31,9 @@ SET time_zone = "+00:00";
 CREATE TABLE `auditoria` (
   `id` int(11) NOT NULL,
   `description` varchar(255) COLLATE utf8_spanish_ci NOT NULL,
-  `id_usuario` int(11) NOT NULL
+  `id_usuario` int(11) NOT NULL,
+  `id_ficha_personal` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
-
---
--- Volcado de datos para la tabla `auditoria`
---
-
-INSERT INTO `auditoria` (`id`, `description`, `id_usuario`) VALUES
-(1, 'Nuevo registro de ficha personal al usuario marcos gallardo con fecha de entrada 2019-5-2', 2);
 
 -- --------------------------------------------------------
 
@@ -53,15 +47,6 @@ CREATE TABLE `fecha_registro` (
   `fecha_salida` date NOT NULL,
   `id_ficha_personal` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
-
---
--- Volcado de datos para la tabla `fecha_registro`
---
-
-INSERT INTO `fecha_registro` (`id`, `fecha_entrada`, `fecha_salida`, `id_ficha_personal`) VALUES
-(84, '2019-05-02', '0000-00-00', 98),
-(85, '2019-05-02', '0000-00-00', 99),
-(86, '2019-05-02', '0000-00-00', 100);
 
 -- --------------------------------------------------------
 
@@ -83,10 +68,7 @@ CREATE TABLE `ficha_personal` (
 
 INSERT INTO `ficha_personal` (`id`, `nombre`, `apellidos`, `dni`, `image`) VALUES
 (1, 'Paquito', 'El calles', '12345678Z', ''),
-(2, 'Marieta', 'Homeless', '32165487Z', ''),
-(98, 'marcos', 'gallardo', '98765432z', 'http://localhost/api/public/image/imagenPerfil98.jpg'),
-(99, 'marcos', 'asd', '89765421', 'http://localhost/api/public/image/imagenPerfil99.jpg'),
-(100, 'marcos', 'gallardo', '', 'http://localhost/api/public/image/imagenPerfil100.png');
+(2, 'Marieta', 'Homeless', '32165487Z', '');
 
 -- --------------------------------------------------------
 
@@ -120,7 +102,8 @@ INSERT INTO `usuarios` (`id`, `nombre`, `email`, `password`, `perfil`) VALUES
 --
 ALTER TABLE `auditoria`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_idUsuario` (`id_usuario`);
+  ADD KEY `fk_idUsuario` (`id_usuario`),
+  ADD KEY `fk_idFichaPersonal` (`id_ficha_personal`);
 
 --
 -- Indices de la tabla `fecha_registro`
@@ -149,19 +132,19 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `auditoria`
 --
 ALTER TABLE `auditoria`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `fecha_registro`
 --
 ALTER TABLE `fecha_registro`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
 
 --
 -- AUTO_INCREMENT de la tabla `ficha_personal`
 --
 ALTER TABLE `ficha_personal`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
@@ -177,7 +160,8 @@ ALTER TABLE `usuarios`
 -- Filtros para la tabla `auditoria`
 --
 ALTER TABLE `auditoria`
-  ADD CONSTRAINT `fk_idUsuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`);
+  ADD CONSTRAINT `fk_idFichaPersonal` FOREIGN KEY (`id_ficha_personal`) REFERENCES `ficha_personal` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_idUsuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `fecha_registro`
