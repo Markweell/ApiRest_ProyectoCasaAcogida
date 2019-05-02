@@ -135,3 +135,11 @@ function getLastIdFichaPersonal($conexion){
     $rows = $res->fetch();
     return $rows['AUTO_INCREMENT'];
 }
+
+function auditChange($conexion, $id_usuario, $description){
+    $valores = [":idUsuario"=>$id_usuario, ":description"=>$description];
+    $consulta = $conexion->prepare('INSERT INTO auditoria(description,id_usuario) 
+    VALUES (:description, :idUsuario)');
+    $consulta->execute($valores);
+
+}
