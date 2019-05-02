@@ -136,10 +136,10 @@ function getLastIdFichaPersonal($conexion){
     return $rows['AUTO_INCREMENT'];
 }
 
-function auditChange($conexion, $id_usuario, $description){
-    $valores = [":idUsuario"=>$id_usuario, ":description"=>$description];
-    $consulta = $conexion->prepare('INSERT INTO auditoria(description,id_usuario) 
-    VALUES (:description, :idUsuario)');
+function auditChange($conexion, $id_usuario,$id_ficha_personal, $description){
+    $valores = [":idUsuario"=>$id_usuario, ":idFichaPersonal"=>$id_ficha_personal, ":description"=>$description];
+    $consulta = $conexion->prepare('INSERT INTO auditoria(description,id_usuario,id_ficha_personal) 
+    VALUES (:description, :idUsuario, :idFichaPersonal)');
     $consulta->execute($valores);
 
 }

@@ -186,7 +186,11 @@ function agregarFichaPersonal($response, $request, $next){
     VALUES (:fechaEntrada, :idFichaPersonal)');
     $resultado = $consulta->execute($valoresFecha);
 
-    auditChange($conexion, getIdOfToken(getTokenOfHeader()), "Nuevo registro de ficha personal a: ".$nombre." ".$apellidos." con fecha de entrada ". $fechaEntrada);
+    auditChange(
+        $conexion,
+        getIdOfToken(getTokenOfHeader()),
+        $id_Ficha_Personal,
+        "INSERT");
     
     if($resultado)
         return json_encode(["status"=>"OPERATION_SUCESS"]);
