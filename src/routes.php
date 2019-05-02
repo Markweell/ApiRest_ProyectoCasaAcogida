@@ -1,11 +1,12 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Token");
+header("Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, token");
 header("Content-Type: application/json");
 
 require_once "Conexion.php";
 require_once "functions.php";
+require_once "constants.php";
 
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -16,10 +17,13 @@ use Slim\Helper\Set;
 $app->group('/api', function () use ($app) {
     // Version group
     $app->group('/v1', function () use ($app) {
+        $app->get('/obtenerFichasPersonales', 'obtenerFichasPersonales');
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');
         $app->post('/validateLogin', 'validateLogin');
+        $app->post('/agregarFichaPersonal','agregarFichaPersonal');
+        $app->post('/obtenerFichasPersonalesPorFecha','obtenerFichasPersonalesPorFecha');
     });
   });
 
@@ -71,8 +75,8 @@ function forgotPassword($response, $request, $next) {
 function validateToken($response, $request, $next){
     $resp = json_decode($response->getBody());
     $token = $resp->token;
-
     $comprobacionToken = validarToken($token);
+    
     return json_encode($comprobacionToken);
 }
 
@@ -91,9 +95,7 @@ function changePassword($response, $request, $next){
     //Descomentar si vamos a encriptar la contraseña
     //$password = encrypt_password($resp->password);
     
-    $comprobacionToken = validarToken($token);
-
-    if(!$comprobacionToken)
+    if(!validarToken($token))
         return json_encode(["status"=>"TOKEN_EXPIRED"]);
 
     
@@ -139,18 +141,89 @@ function validateLogin($response, $request, $next){
     if(!$resultadoBusqueda)
         return json_encode(false);
     
-    //Descomentar si usamos contraseña encriptada
+    // Descomentar si usamos contraseña encriptada
     // if(!password_verify($password,$resultadoBusqueda["password"]))
     //     return json_encode(false);
 
     $idUsuario = $resultadoBusqueda['id'];
     $nombreUsuario = $resultadoBusqueda['nombre'];
+    $perfil = $resultadoBusqueda['perfil'];
 
-    $token = generateToken($idUsuario);
-    return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
+    $token = generateTokenLogin($idUsuario, $nombreUsuario, $perfil);
+    return json_encode($token);
+    // return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
 }
 
+function agregarFichaPersonal($response, $request, $next){
+    
+    if(!validarToken(getTokenOfHeader()))
+        return json_encode(["status"=>"SESSION_EXPIRED"]);
 
+    $resp = json_decode($response->getBody());
+    $nombre = $resp->nombre;              
+    $apellidos = $resp->apellidos;
+    $dni = $resp->dni;
+    $image = $resp->image;
+    $fechaEntrada = $resp->fechaEntrada;
+    $conexion = \Conexion::getConnection();
+
+    $id_Ficha_Personal = getLastIdFichaPersonal($conexion);
+
+    if($image==''){
+        $urlImagen =  URL_IMAGE.'image/StandarProfile.png';
+    }else{
+        decodeBase64Image($image, $id_Ficha_Personal);
+        $urlImagen = URL_IMAGE.'image/imagenPerfil'.$id_Ficha_Personal.'.'.getExtension(substr($image, 11,1));
+    }
+    
+    $valores = [":nombre"=>$nombre, ":apellidos"=>$apellidos,":dni"=>$dni,":image"=>$urlImagen];
+    $consulta = $conexion->prepare('INSERT INTO ficha_personal(id, nombre, apellidos, dni, image) 
+    VALUES (NULL, :nombre, :apellidos, :dni, :image)');
+    $consulta->execute($valores);
+
+    $valoresFecha = [":fechaEntrada"=>$fechaEntrada, ":idFichaPersonal"=>$id_Ficha_Personal];
+    $consulta = $conexion->prepare('INSERT INTO fecha_registro (fecha_entrada, id_ficha_personal) 
+    VALUES (:fechaEntrada, :idFichaPersonal)');
+    $resultado = $consulta->execute($valoresFecha);
+
+    auditChange(
+        $conexion,
+        getIdOfToken(getTokenOfHeader()),
+        $id_Ficha_Personal,
+        "INSERT");
+    
+    if($resultado)
+        return json_encode(["status"=>"OPERATION_SUCESS"]);
+    else
+        return json_encode(["status"=>"OPERATION_ERROR"]);
+
+}
+
+function obtenerFichasPersonales($response, $request, $next){
+    $conexion = \Conexion::getConnection();
+    $consulta = $conexion->prepare('SELECT * FROM ficha_personal');
+    $consulta->execute();
+    $resultadoBusqueda=$consulta->fetchAll();
+    return json_encode($resultadoBusqueda);
+}
+
+function obtenerFichasPersonalesPorFecha($response, $request, $next){
+    $conexion = \Conexion::getConnection();
+    $resp = json_decode($response->getBody());
+    $fechaEntrada = $resp->fechaEntrada;
+    $valores = [":fechaEntrada"=>$fechaEntrada];
+    $consulta = $conexion->prepare('SELECT * FROM ficha_personal where id IN (SELECT id_ficha_personal from fecha_registro where fecha_entrada = :fechaEntrada )');
+    $consulta->execute($valores);
+    $resultadoBusqueda=$consulta->fetchAll();
+    return json_encode($resultadoBusqueda);
+}
+function obtenerFichaPersonal($response, $request, $next){
+    $conexion = \Conexion::getConnection();
+    $consulta = $conexion->prepare('SELECT * FROM ficha_personal');
+    $consulta->execute();
+    $resultadoBusqueda=$consulta->fetchAll();
+    return json_encode($resultadoBusqueda);
+}
 // function obtenerUsuarios($response, $request, $next) {
 //     $sql = "SELECT * FROM usuarios";
 //     // if(getallheaders()['Token']!="sucess"){

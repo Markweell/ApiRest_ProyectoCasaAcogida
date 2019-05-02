@@ -14,9 +14,26 @@ require_once "constants.php";
  */
 function generateToken($idUsuario){
     $userId = $idUsuario;
-    $expiration = time()+ EXPIRE_TIME;
+    $expiration = time()+ EXPIRE_TIME_EMAIL;
     $issuer = 'localhost';
     return Token::create($userId, SECRET, $expiration, $issuer);
+}
+
+/**
+ * Genera un token para la sesión del usuario
+ * @param int $idUsuario: id del Usuario al que le vamos a generar el token.
+ */
+function generateTokenLogin($userId, $username, $userProfile){
+    $payload = [
+        'user_id' => $userId,
+        'user_name' => $username,
+        'profile' => $userProfile,
+        'iat' => time(),
+        'exp' => time() + EXPIRE_TIME_SESSION,
+        'iss' => 'server'
+    ];
+    
+    return Token::customPayload($payload, SECRET);
 }
 
 /**
@@ -81,4 +98,48 @@ function sendEmail($email, $asunto, $body){
     } catch (Exception $e) {
         return false;
     }
+}
+function decodeBase64Image($Base64Img, $id){
+
+//eliminamos data:image/png; y base64, de la cadena que tenemos
+//hay otras formas de hacerlo                
+$extension = getExtension(substr($Base64Img, 11,1));   
+list(, $Base64Img) = explode(';', $Base64Img);
+list(, $Base64Img) = explode(',', $Base64Img);
+//Decodificamos $Base64Img codificada en base64.
+$Base64Img = base64_decode($Base64Img);
+//escribimos la información obtenida en un archivo llamado 
+//unodepiera.png para que se cree la imagen correctamente
+
+
+file_put_contents('image/imagenPerfil'.$id.'.'.$extension, $Base64Img);
+}
+function getExtension($letra){
+    switch($letra){
+        case 'j':
+            return 'jpg';
+        case 'p':
+            return 'png';
+        case 'g':
+            return 'gif';
+        case 'w': 
+            return 'webp';
+    }
+}
+function getTokenOfHeader(){
+    return getallheaders()['token'];
+}
+function getLastIdFichaPersonal($conexion){
+    $res=$conexion->prepare("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'api_proyecto_php' AND TABLE_NAME = 'ficha_personal'");
+    $res->execute();
+    $rows = $res->fetch();
+    return $rows['AUTO_INCREMENT'];
+}
+
+function auditChange($conexion, $id_usuario,$id_ficha_personal, $description){
+    $valores = [":idUsuario"=>$id_usuario, ":idFichaPersonal"=>$id_ficha_personal, ":description"=>$description];
+    $consulta = $conexion->prepare('INSERT INTO auditoria(description,id_usuario,id_ficha_personal) 
+    VALUES (:description, :idUsuario, :idFichaPersonal)');
+    $consulta->execute($valores);
+
 }
