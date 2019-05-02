@@ -14,7 +14,7 @@ require_once "constants.php";
  */
 function generateToken($idUsuario){
     $userId = $idUsuario;
-    $expiration = time()+ EXPIRE_TIME;
+    $expiration = time()+ EXPIRE_TIME_EMAIL;
     $issuer = 'localhost';
     return Token::create($userId, SECRET, $expiration, $issuer);
 }
@@ -29,7 +29,7 @@ function generateTokenLogin($userId, $username, $userProfile){
         'user_name' => $username,
         'profile' => $userProfile,
         'iat' => time(),
-        'exp' => time() + EXPIRE_TIME,
+        'exp' => time() + EXPIRE_TIME_SESSION,
         'iss' => 'server'
     ];
     
@@ -126,7 +126,7 @@ function getExtension($letra){
             return 'webp';
     }
 }
-function comprobarToken(){
+function getTokenOfHeader(){
     return getallheaders()['token'];
 }
 function getLastIdFichaPersonal($conexion){

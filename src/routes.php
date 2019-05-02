@@ -93,9 +93,7 @@ function changePassword($response, $request, $next){
     //Descomentar si vamos a encriptar la contraseña
     //$password = encrypt_password($resp->password);
     
-    $comprobacionToken = validarToken($token);
-
-    if(!$comprobacionToken)
+    if(!validarToken($token))
         return json_encode(["status"=>"TOKEN_EXPIRED"]);
 
     
@@ -156,6 +154,9 @@ function validateLogin($response, $request, $next){
 
 function agregarFichaPersonal($response, $request, $next){
     
+    if(!validarToken(getTokenOfHeader()))
+        return json_encode(["status"=>"SESSION_EXPIRED"]);
+
     $resp = json_decode($response->getBody());
     $nombre = $resp->nombre;              
     $apellidos = $resp->apellidos;
@@ -168,11 +169,8 @@ function agregarFichaPersonal($response, $request, $next){
     if($image==''){
         $urlImagen = 'http://localhost/api/public/image/StandarProfile.png';
     }else{
-        echo $image;
         decodeBase64Image($image, $id_Ficha_Personal);
-
         $urlImagen = 'http://localhost/api/public/image/imagenPerfil'.$id_Ficha_Personal.'.'.getExtension(substr($image, 11,1));
-        
     }
     
     $valores = [":nombre"=>$nombre, ":apellidos"=>$apellidos,":dni"=>$dni,":image"=>$urlImagen];
@@ -188,7 +186,10 @@ function agregarFichaPersonal($response, $request, $next){
     VALUES (:fechaEntrada, :idFichaPersonal)');
     $resultado = $consulta->execute($valoresFecha);
 
-    return json_encode($resultado);
+    if($resultado)
+        return json_encode(["status"=>"OPERATION_SUCESS"]);
+    else
+        return json_encode(["status"=>"OPERATION_ERROR"]);
 
 }
 function obtenerFichasPersonales($response, $request, $next){
