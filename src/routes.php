@@ -15,6 +15,7 @@ require 'routesFunction/validateToken.php';
 require 'routesFunction/changePassword.php';
 require 'routesFunction/validateLogin.php';
 require 'routesFunction/obtenerFichaPersonal.php';
+
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Helper\Set;
