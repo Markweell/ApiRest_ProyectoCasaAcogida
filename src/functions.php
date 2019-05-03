@@ -69,7 +69,7 @@ function getIdOfToken($token){
 /**
  * Envia un email con asunto y una descripción
  * @param string email: email al que se va a enviar el correo,
- * @param string remitente: nombre de la persona que va a recibir el correo,
+ * @param string remitente: nombre de la persona que va a recibir el correo,0
  * @param string asunto: asunto del email que se va a enviar,
  * @param string body: cuerpo del email que se va a enviar
  */
@@ -129,12 +129,7 @@ function getExtension($letra){
 function getTokenOfHeader(){
     return getallheaders()['token'];
 }
-function getLastIdFichaPersonal($conexion){
-    $res=$conexion->prepare("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'api_proyecto_php' AND TABLE_NAME = 'ficha_personal'");
-    $res->execute();
-    $rows = $res->fetch();
-    return $rows['AUTO_INCREMENT'];
-}
+
 
 function auditChange($conexion, $id_usuario,$id_ficha_personal, $description){
     $valores = [":idUsuario"=>$id_usuario, ":idFichaPersonal"=>$id_ficha_personal, ":description"=>$description];
