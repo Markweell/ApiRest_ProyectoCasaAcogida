@@ -7,9 +7,14 @@ header("Content-Type: application/json");
 require_once "Conexion.php";
 require_once "functions.php";
 require_once "constants.php";
-require 'views/obtenerFichasPersonales.php';
-require 'views/agregarFichaPersonal.php';
-require 'views/obtenerFichasPersonalesPorFecha.php';
+require 'routesFunction/obtenerFichasPersonales.php';
+require 'routesFunction/agregarFichaPersonal.php';
+require 'routesFunction/obtenerFichasPersonalesPorFecha.php';
+require 'routesFunction/forgotPassword.php';
+require 'routesFunction/validateToken.php';
+require 'routesFunction/changePassword.php';
+require 'routesFunction/validateLogin.php';
+require 'routesFunction/obtenerFichaPersonal.php';
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Helper\Set;
@@ -25,6 +30,7 @@ $app->group('/api', function () use ($app) {
         $app->post('/changePassword', 'changePassword');
         $app->post('/validateLogin', 'validateLogin');
         $app->post('/agregarFichaPersonal','agregarFichaPersonal');
+        $app->post('/obtenerFichaPersonal','obtenerFichaPersonal');
         $app->post('/obtenerFichasPersonalesPorFecha','obtenerFichasPersonalesPorFecha');
     });
   });
@@ -36,133 +42,6 @@ $app->get('/[{name}]', function (Request $request, Response $response, array $ar
     return $this->renderer->render($response, 'index.phtml', $args);
 });
 
-/**
- * Recoge un email de una peticion post, se comprueba que este está en la base de datos y si lo está se le genera
- * un token y se le envia un correo con ese token.
- */
-function forgotPassword($response, $request, $next) {
-    $variable = json_decode($response->getBody());
-    $email = $variable->email;
-
-    $conexion = \Conexion::getConnection();
-    $valores = [":email"=>$email];
-    $consulta = $conexion->prepare('SELECT * FROM usuarios where email = :email');
-    $consulta->execute($valores);
-    $resultadoBusqueda=$consulta->fetch();
-    $idUsuario = $resultadoBusqueda['id'];
-    $nombreUsuario = $resultadoBusqueda['nombre'];
-
-    if(!$resultadoBusqueda)
-        return json_encode(false);
-  
-    $token = generateToken($idUsuario);
-
-    $asunto= 'Hola '.$nombreUsuario.', vamos a resetear su contraseña';
-    $body = '<p>Hola, ' .$nombreUsuario.'</p>
-    <p>Hemos recibido una solicitud de un restablecimiento de contraseña de la cuenta asociada a esta dirección de 
-    correo electrónico.</p>
-    <p> Para confirmar y restablecer su contraseña, por favor haga click
-    <a href="http://localhost:4200/change_password/'.$token.'">aquí</a> 
-    o accede a la siguiente dirección: 
-    <a href="http://localhost:4200/change_password/'.$token.'">http://localhost:4200/change_password/'.$token.'</a>. 
-    Si no has iniciado esta solicitud, ignore este mensaje.</p>
-    <p>Saludos</p>';
-    
-    return json_encode(sendEmail($email, $asunto, $body));
-}
-
-/**
- * Recibe un token de una petición post y lo valida.
- */
-function validateToken($response, $request, $next){
-    $resp = json_decode($response->getBody());
-    $token = $resp->token;
-    $comprobacionToken = validarToken($token);
-    
-    return json_encode($comprobacionToken);
-}
-
-/**
- * Recibe un token y una contraseña de una petición post y si el token es válido y no ha expirado,
- * modifica la contraseña del usuario cuyo id se encuentra en el token.
- */
-function changePassword($response, $request, $next){
-    $resp = json_decode($response->getBody());
-
-    $token = $resp->token;
-
-    //Comentar si vamos a encriptar la contraseña
-    $password = $resp->password;
-
-    //Descomentar si vamos a encriptar la contraseña
-    //$password = encrypt_password($resp->password);
-    
-    if(!validarToken($token))
-        return json_encode(["status"=>"TOKEN_EXPIRED"]);
-
-    
-    $idUsuario = getIdOfToken($token);
-   
-    $conexion = \Conexion::getConnection();
-    $valores = [":id"=>$idUsuario, ":password"=>$password];
-    $consulta = $conexion->prepare('UPDATE usuarios SET password=:password where id = :id');
-
-    
-    if($consulta->execute($valores))
-        return json_encode(["status"=>"PASSWORD_CHANGED"]);
-    return json_encode(["status"=>"PASSWORD_ERROR"]);
-
-}
-
-/**
- * Recibe una petición post con un email y una password, comprueba que existen en la base de datos y
- * en el caso de que existan, devuelve una json con id, nombre y token generado en base al id del usuario 
- */
-function validateLogin($response, $request, $next){
-    $resp = json_decode($response->getBody());
-    $email = $resp->email;              
-    $password = $resp->password;
-
-    $conexion = \Conexion::getConnection();
-
-    //Comentar si usamos contraseña encriptada
-    $valores = [":email"=>$email, ":password"=>$password];
-
-    //Descomentar si usamos contraseña encriptada
-    // $valores = [":email"=>$email];
-
-    //Comentar si usamos contraseña encriptada
-    $consulta = $conexion->prepare('SELECT * FROM usuarios where email = :email and password = :password');
-
-    //Descomentar si usamos contraseña encriptada
-    // $consulta = $conexion->prepare('SELECT * FROM usuarios where email = :email');
-
-    $consulta->execute($valores);
-    $resultadoBusqueda=$consulta->fetch();
-
-    if(!$resultadoBusqueda)
-        return json_encode(false);
-    
-    // Descomentar si usamos contraseña encriptada
-    // if(!password_verify($password,$resultadoBusqueda["password"]))
-    //     return json_encode(false);
-
-    $idUsuario = $resultadoBusqueda['id'];
-    $nombreUsuario = $resultadoBusqueda['nombre'];
-    $perfil = $resultadoBusqueda['perfil'];
-
-    $token = generateTokenLogin($idUsuario, $nombreUsuario, $perfil);
-    return json_encode($token);
-    // return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
-}
-
-function obtenerFichaPersonal($response, $request, $next){
-    $conexion = \Conexion::getConnection();
-    $consulta = $conexion->prepare('SELECT * FROM ficha_personal');
-    $consulta->execute();
-    $resultadoBusqueda=$consulta->fetchAll();
-    return json_encode($resultadoBusqueda);
-}
 // function obtenerUsuarios($response, $request, $next) {
 //     $sql = "SELECT * FROM usuarios";
 //     // if(getallheaders()['Token']!="sucess"){
