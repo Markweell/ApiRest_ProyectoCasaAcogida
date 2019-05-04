@@ -7,14 +7,16 @@ header("Content-Type: application/json");
 require_once "Conexion.php";
 require_once "functions.php";
 require_once "constants.php";
-require 'routesFunction/obtenerFichasPersonales.php';
-require 'routesFunction/agregarFichaPersonal.php';
-require 'routesFunction/obtenerFichasPersonalesPorFecha.php';
 require 'routesFunction/forgotPassword.php';
 require 'routesFunction/validateToken.php';
 require 'routesFunction/changePassword.php';
 require 'routesFunction/validateLogin.php';
 require 'routesFunction/obtenerFichaPersonal.php';
+require 'routesFunction/obtenerFichasPersonales.php';
+require 'routesFunction/agregarFichaPersonal.php';
+require 'routesFunction/obtenerFichasPersonalesPorFechaDeCreacion.php';
+require 'routesFunction/obtenerFichasPersonalesPorFechaDeEntrada.php';
+require 'routesFunction/obtenerFichasPersonalesPorFechaDeSalida.php';
 
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -32,7 +34,9 @@ $app->group('/api', function () use ($app) {
         $app->post('/validateLogin', 'validateLogin');
         $app->post('/agregarFichaPersonal','agregarFichaPersonal');
         $app->post('/obtenerFichaPersonal','obtenerFichaPersonal');
-        $app->post('/obtenerFichasPersonalesPorFecha','obtenerFichasPersonalesPorFecha');
+        $app->post('/obtenerFichasPersonalesPorFechaDeCreacion','obtenerFichasPersonalesPorFechaDeCreacion');
+        $app->post('/obtenerFichasPersonalesPorFechaDeEntrada','obtenerFichasPersonalesPorFechaDeEntrada');
+        $app->post('/obtenerFichasPersonalesPorFechaDeSalida','obtenerFichasPersonalesPorFechaDeSalida');
     });
   });
 
