@@ -74,9 +74,9 @@
      * Inserta una ficha personal en la base de datos
      */
     function insertarUsuario($valores, $conexion, $urlImagen){
-        $valoresConsulta = [":nombre"=>$valores['nombre'], ":apellidos"=>$valores['apellidos'],":dni"=>$valores['dni'],":image"=>$urlImagen];
-        $consulta = $conexion->prepare('INSERT INTO ficha_personal(id, nombre, apellidos, dni, image) 
-        VALUES (NULL, :nombre, :apellidos, :dni, :image)');
+        $valoresConsulta = [":nombre"=>$valores['nombre'], ":apellidos"=>$valores['apellidos'],":dni"=>$valores['dni'],":image"=>$urlImagen,":fecha_creacion"=>$valores['fechaEntrada']];
+        $consulta = $conexion->prepare('INSERT INTO ficha_personal(id, nombre, apellidos, dni, image, fecha_creacion) 
+        VALUES (NULL, :nombre, :apellidos, :dni, :image, :fecha_creacion)');
         return $consulta->execute($valoresConsulta);
     }
     /**
