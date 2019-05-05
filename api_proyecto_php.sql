@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.8.3
+-- version 4.8.5
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 02-05-2019 a las 22:03:24
--- Versión del servidor: 10.1.37-MariaDB
--- Versión de PHP: 7.2.12
+-- Tiempo de generación: 05-05-2019 a las 12:25:27
+-- Versión del servidor: 10.1.38-MariaDB
+-- Versión de PHP: 7.3.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -35,6 +35,13 @@ CREATE TABLE `auditoria` (
   `id_ficha_personal` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
+--
+-- Volcado de datos para la tabla `auditoria`
+--
+
+INSERT INTO `auditoria` (`id`, `description`, `id_usuario`, `id_ficha_personal`) VALUES
+(3, 'INSERT', 1, 5);
+
 -- --------------------------------------------------------
 
 --
@@ -48,6 +55,13 @@ CREATE TABLE `fecha_registro` (
   `id_ficha_personal` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
+--
+-- Volcado de datos para la tabla `fecha_registro`
+--
+
+INSERT INTO `fecha_registro` (`id`, `fecha_entrada`, `fecha_salida`, `id_ficha_personal`) VALUES
+(4, '2019-05-05', '2019-05-11', 5);
+
 -- --------------------------------------------------------
 
 --
@@ -59,16 +73,16 @@ CREATE TABLE `ficha_personal` (
   `nombre` varchar(255) COLLATE utf8_spanish_ci NOT NULL,
   `apellidos` varchar(255) COLLATE utf8_spanish_ci NOT NULL,
   `dni` varchar(255) COLLATE utf8_spanish_ci NOT NULL,
-  `image` varchar(255) COLLATE utf8_spanish_ci NOT NULL
+  `image` varchar(255) COLLATE utf8_spanish_ci NOT NULL,
+  `fecha_creacion` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_spanish_ci;
 
 --
 -- Volcado de datos para la tabla `ficha_personal`
 --
 
-INSERT INTO `ficha_personal` (`id`, `nombre`, `apellidos`, `dni`, `image`) VALUES
-(1, 'Paquito', 'El calles', '12345678Z', ''),
-(2, 'Marieta', 'Homeless', '32165487Z', '');
+INSERT INTO `ficha_personal` (`id`, `nombre`, `apellidos`, `dni`, `image`, `fecha_creacion`) VALUES
+(5, 'Juan Antonio', 'Rodríguez Segura', '21458236X', 'http://localhost/api/public/image/imagenPerfil5.jpg', '2019-05-04');
 
 -- --------------------------------------------------------
 
@@ -138,13 +152,13 @@ ALTER TABLE `auditoria`
 -- AUTO_INCREMENT de la tabla `fecha_registro`
 --
 ALTER TABLE `fecha_registro`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `ficha_personal`
 --
 ALTER TABLE `ficha_personal`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
