@@ -29,7 +29,7 @@ function generateTokenLogin($userId, $username, $userProfile){
         'user_name' => $username,
         'profile' => $userProfile,
         'iat' => time(),
-        'exp' => time() + EXPIRE_TIME_SESSION,
+        'exp' => time() + 7200,
         'iss' => 'server'
     ];
     

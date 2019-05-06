@@ -15,6 +15,7 @@ require 'routesFunction/validateToken.php';
 require 'routesFunction/changePassword.php';
 require 'routesFunction/validateLogin.php';
 require 'routesFunction/obtenerFichaPersonal.php';
+require 'routesFunction/getRandomToken.php';
 
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -26,6 +27,7 @@ $app->group('/api', function () use ($app) {
     // Version group
     $app->group('/v1', function () use ($app) {
         $app->get('/obtenerFichasPersonales', 'obtenerFichasPersonales');
+        $app->get('/getRandomToken','getRandomToken'); //Usado para pruebas
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');
