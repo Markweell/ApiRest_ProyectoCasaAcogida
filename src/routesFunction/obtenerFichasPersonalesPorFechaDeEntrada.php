@@ -3,7 +3,7 @@
  * Recibe una fecha por post y te devuelve todas las fichas personales con esa fecha de entrada.
  * @return resultados en formato json de la consulta.
  */
-function obtenerFichasPersonalesPorFecha($response, $request, $next){
+function obtenerFichasPersonalesPorFechaDeEntrada($response, $request, $next){
     
     if(!validarToken(getTokenOfHeader()))
             return json_encode(["status"=>"SESSION_EXPIRED"]);
