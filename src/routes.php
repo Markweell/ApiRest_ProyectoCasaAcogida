@@ -7,6 +7,11 @@ header("Content-Type: application/json");
 require_once "Conexion.php";
 require_once "functions.php";
 require_once "constants.php";
+
+//GET
+require 'routesFunction/obtenerFichasPersonales.php';
+require 'routesFunction/obtenerTiposDocumentos.php';
+//POST
 require 'routesFunction/forgotPassword.php';
 require 'routesFunction/validateToken.php';
 require 'routesFunction/changePassword.php';
@@ -30,6 +35,7 @@ $app->group('/api', function () use ($app) {
     $app->group('/v1', function () use ($app) {
         $app->get('/obtenerFichasPersonales', 'obtenerFichasPersonales');
         $app->get('/getRandomToken','getRandomToken'); //Usado para pruebas
+        $app->get('/obtenerTiposDocumentos', 'obtenerTiposDocumentos');
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');
