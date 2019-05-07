@@ -7,12 +7,16 @@ header("Content-Type: application/json");
 require_once "Conexion.php";
 require_once "functions.php";
 require_once "constants.php";
+
+//GET
+require 'routesFunction/obtenerFichasPersonales.php';
+require 'routesFunction/obtenerTiposDocumentos.php';
+//POST
 require 'routesFunction/forgotPassword.php';
 require 'routesFunction/validateToken.php';
 require 'routesFunction/changePassword.php';
 require 'routesFunction/validateLogin.php';
 require 'routesFunction/obtenerFichaPersonal.php';
-require 'routesFunction/obtenerFichasPersonales.php';
 require 'routesFunction/agregarFichaPersonal.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeCreacion.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeEntrada.php';
@@ -28,6 +32,7 @@ $app->group('/api', function () use ($app) {
     // Version group
     $app->group('/v1', function () use ($app) {
         $app->get('/obtenerFichasPersonales', 'obtenerFichasPersonales');
+        $app->get('/obtenerTiposDocumentos', 'obtenerTiposDocumentos');
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');

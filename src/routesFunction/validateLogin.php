@@ -14,7 +14,7 @@
         //Descomentar si usamos contraseña encriptada
         // $valores = [":email"=>$email];
         //Comentar si usamos contraseña encriptada
-        $consulta = $conexion->prepare('SELECT * FROM usuarios where email = :email and password = :password');
+        $consulta = $conexion->prepare('SELECT * FROM usuarios, tipo_usuario where usuarios.tipo_usuario_id = tipo_usuario.id AND email = :email and password = :password');
         //Descomentar si usamos contraseña encriptada
         // $consulta = $conexion->prepare('SELECT * FROM usuarios where email = :email');
         $consulta->execute($valores);
@@ -26,7 +26,7 @@
         //     return json_encode(false);
         $idUsuario = $resultadoBusqueda['id'];
         $nombreUsuario = $resultadoBusqueda['nombre'];
-        $perfil = $resultadoBusqueda['perfil'];
+        $perfil = $resultadoBusqueda['tipo'];
         $token = generateTokenLogin($idUsuario, $nombreUsuario, $perfil);
         return json_encode($token);
         // return json_encode(["id"=>$idUsuario,"nombre"=>$nombreUsuario, "token"=>$token]);
