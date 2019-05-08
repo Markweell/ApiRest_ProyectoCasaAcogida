@@ -20,7 +20,6 @@ require 'routesFunction/changePassword.php';
 require 'routesFunction/validateLogin.php';
 require 'routesFunction/obtenerFichaPersonal.php';
 require 'routesFunction/getRandomToken.php';
-require 'routesFunction/obtenerFichasPersonales.php';
 require 'routesFunction/agregarFichaPersonal.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeCreacion.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeEntrada.php';
