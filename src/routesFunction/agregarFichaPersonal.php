@@ -3,25 +3,17 @@
      * Registra una ficha personal
      */
     function agregarFichaPersonal($response, $request, $next){
-        if(!validarToken(getTokenOfHeader()))
-            return json_encode(["status"=>"SESSION_EXPIRED"]);
+        // if(!validarToken(getTokenOfHeader()))
+        //     return json_encode(["status"=>"SESSION_EXPIRED"]);
         $conexion = \Conexion::getConnection();
         $valores = obtenerDatos($response);
-        if(comprobarDniExistente($conexion,$valores['dni']))
-            return json_encode(["status"=>"DOCUMENTATION_EXISTS"]);
-
+        // if(comprobarDniExistente($conexion,$valores['dni']))
+        //     return json_encode(["status"=>"DOCUMENTATION_EXISTS"]);
+        
         $id_Ficha_Personal = getLastIdFichaPersonal($conexion);
         $urlImagen = getUrlImagen($valores['image'], $id_Ficha_Personal);
 
-        if(
-            insertarUsuario($valores, $conexion, $urlImagen) 
-            && insertarFechas($valores, $conexion, $id_Ficha_Personal)
-            ){
-            auditChange(
-                $conexion,
-                getIdOfToken(getTokenOfHeader()),
-                $id_Ficha_Personal,
-                "INSERT");
+        if(insertarUsuario($valores, $conexion, $urlImagen)){
             return json_encode(["status"=>"OPERATION_SUCCESS"]);
         }else
             return json_encode(["status"=>"OPERATION_ERROR"]);
@@ -43,11 +35,19 @@
     function obtenerDatos($response){
         $resp = json_decode($response->getBody());
         $nombre = $resp->nombre;              
-        $apellidos = $resp->apellidos;
-        $dni = $resp->dni;
+        $apellido1 = $resp->apellido1;
+        $apellido2 = $resp->apellido2;
+        $fechaNacimiento = $resp->fechaNacimiento;
+        $lugarNacimiento = $resp->lugarNacimiento;
+        $sexo = $resp->sexo;
+        $nacionalidad = $resp->nacionalidad;
+        $document = $resp->document;
+        $documentType = $resp->documentType;
+        $observaciones = $resp->observaciones;
         $image = $resp->image;
-        $fechaEntrada = $resp->fechaEntrada;
-        return ['nombre'=>$nombre,'apellidos'=>$apellidos , 'dni'=> $dni, 'image'=>$image, 'fechaEntrada'=>$fechaEntrada];
+        return ['nombre'=>$nombre,'apellido1'=>$apellido1 ,'apellido2'=>$apellido2,'fechaNacimiento'=>$fechaNacimiento,
+        'lugarNacimiento'=>$lugarNacimiento,'sexo'=>$sexo,'nacionalidad'=>$nacionalidad,'document'=>$document,
+        'documentType'=>$documentType,'observaciones'=>$observaciones, 'image'=>$image,];
     }
     /**
      * Define la url donde se aloja la foto y construlle el nombre de la foto en base al id de la ficha personal
@@ -64,7 +64,7 @@
      * Obtiene el último id de la tabla ficha_personal
      */
     function getLastIdFichaPersonal($conexion){
-        $res=$conexion->prepare("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'api_proyecto_php' AND TABLE_NAME = 'ficha_personal'");
+        $res=$conexion->prepare("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'api_proyecto_php' AND TABLE_NAME = 'fichas_personas'");
         $res->execute();
         $rows = $res->fetch();
         return $rows['AUTO_INCREMENT'];
@@ -74,9 +74,17 @@
      * Inserta una ficha personal en la base de datos
      */
     function insertarUsuario($valores, $conexion, $urlImagen){
-        $valoresConsulta = [":nombre"=>$valores['nombre'], ":apellidos"=>$valores['apellidos'],":dni"=>$valores['dni'],":image"=>$urlImagen,":fecha_creacion"=>$valores['fechaEntrada']];
-        $consulta = $conexion->prepare('INSERT INTO ficha_personal(id, nombre, apellidos, dni, image, fecha_creacion) 
-        VALUES (NULL, :nombre, :apellidos, :dni, :image, :fecha_creacion)');
+        $valoresConsulta = [":nombre"=>$valores['nombre'], ":apellido1"=>$valores['apellido1'],
+        ":apellido2"=>$valores['apellido2'],":fechaNacimiento"=>$valores['fechaNacimiento'],
+        ":lugarNacimiento"=>$valores['lugarNacimiento'],":sexo"=>$valores['sexo'],
+        ":nacionalidad"=>$valores['nacionalidad'],":image"=>$urlImagen];
+        // $valoresConsulta = [":nombre"=>$valores['nombre'],":apellido1"=>$valores['apellido1'],
+        // ":apellido2"=>$valores['apellido2']];
+        $consulta = $conexion->prepare('INSERT INTO fichas_personas(apellido1,apellido2,nombre,
+        fecha_nacimiento,image,idNacionalidad,idPaisNacimiento,idSexo) 
+        VALUES (:apellido1,:apellido2,:nombre,:fechaNacimiento,:image,:nacionalidad,:lugarNacimiento,:sexo)');
+        // $consulta = $conexion->prepare('INSERT INTO fichas_personas(apellido1,apellido2,nombre) 
+        // VALUES (:apellido1,:apellido2,:nombre)');
         return $consulta->execute($valoresConsulta);
     }
     /**
