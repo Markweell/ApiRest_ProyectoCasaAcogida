@@ -11,6 +11,8 @@ require_once "constants.php";
 //GET
 require 'routesFunction/obtenerFichasPersonales.php';
 require 'routesFunction/obtenerTiposDocumentos.php';
+require 'routesFunction/obtenerPaises.php';
+require 'routesFunction/obtenerSexos.php';
 //POST
 require 'routesFunction/forgotPassword.php';
 require 'routesFunction/validateToken.php';
@@ -31,8 +33,11 @@ use Slim\Helper\Set;
 $app->group('/api', function () use ($app) {
     // Version group
     $app->group('/v1', function () use ($app) {
+
         $app->get('/obtenerFichasPersonales', 'obtenerFichasPersonales');
         $app->get('/obtenerTiposDocumentos', 'obtenerTiposDocumentos');
+        $app->get('/obtenerPaises', 'obtenerPaises');
+        $app->get('/obtenerSexos', 'obtenerSexos');
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');
