@@ -28,6 +28,7 @@ require 'routesFunction/agregarFichaPersonal.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeCreacion.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeEntrada.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeSalida.php';
+require 'routesFunction/agregarNuevaEntrada.php';
 
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -57,6 +58,7 @@ $app->group('/api', function () use ($app) {
         $app->post('/obtenerFichasPersonalesPorFechaDeCreacion','obtenerFichasPersonalesPorFechaDeCreacion');
         $app->post('/obtenerFichasPersonalesPorFechaDeEntrada','obtenerFichasPersonalesPorFechaDeEntrada');
         $app->post('/obtenerFichasPersonalesPorFechaDeSalida','obtenerFichasPersonalesPorFechaDeSalida');
+        $app->post('/agregarNuevaEntrada','agregarNuevaEntrada');
     });
   });
 
