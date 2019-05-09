@@ -17,12 +17,13 @@ require 'routesFunction/obtenerCamasLibres.php';
 require 'routesFunction/obtenerPersonasFueraDeCasa.php';
 require 'routesFunction/obtenerOcupacion.php';
 //POST
+require 'routesFunction/pruebasPhp.php'; // esta hay que borrarla
 require 'routesFunction/forgotPassword.php';
 require 'routesFunction/validateToken.php';
 require 'routesFunction/changePassword.php';
 require 'routesFunction/validateLogin.php';
 require 'routesFunction/obtenerFichaPersonal.php';
-require 'routesFunction/getRandomToken.php';
+require 'routesFunction/getRandomToken.php'; //esta hay que borrarla
 require 'routesFunction/agregarFichaPersonal.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeCreacion.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeEntrada.php';
@@ -46,6 +47,7 @@ $app->group('/api', function () use ($app) {
         $app->get('/obtenerCamasLibres', 'obtenerCamasLibres');
         $app->get('/obtenerPersonasFueraDeCasa', 'obtenerPersonasFueraDeCasa');
         $app->get('/obtenerOcupacion', 'obtenerOcupacion');
+        $app->post('/prueba','pruebasPhp');
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');

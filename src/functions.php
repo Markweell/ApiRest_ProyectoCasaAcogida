@@ -128,3 +128,8 @@ function getDatosCamaLibre($conexion,$idCama)
     $consulta->execute($valores);
     return $consulta->fetchAll();
 }
+function getDatosCreatedAndUpdated(){
+    $thisDate = $date = date("Y")."-".date("m")."-".date("d")." ".date("H").":".date("i").":".date("s").".000000";    
+    $idUsuario = getIdOfToken(getTokenOfHeader());
+    return ["user"=>$idUsuario, "date"=>$thisDate];
+}
