@@ -5,13 +5,12 @@
  */
 function obtenerPersonasFueraDeCasa($response, $request, $next)
 {
-    // if(!validarToken(getTokenOfHeader()))
-    //     return json_encode(["status"=>"SESSION_EXPIRED"]);
+    if(!validarToken(getTokenOfHeader()))
+        return json_encode(["status"=>"SESSION_EXPIRED"]);
     $jsonAEnviar = [];
     $personas = getPersonas();
     if (!$personas) 
-        return;
-    
+        return json_encode(["status"=>"DATA_EMPTY"]);
     foreach ($personas as $persona) {
         $datosPersona = getDatosPersona($persona["id"]);
         if ($datosPersona)
