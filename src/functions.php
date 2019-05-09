@@ -105,3 +105,26 @@ function auditChange($conexion, $id_usuario,$id_ficha_personal, $description){
     $consulta->execute($valores);
 
 }
+
+function getHabitaciones($conexion)
+{
+    $consulta = $conexion->prepare('SELECT id, habitacion FROM `habitaciones`');
+    $consulta->execute();
+    return $consulta->fetchAll();
+}
+
+function getCamasHabitacion($conexion,$idHabitacion)
+{
+    $valores = [":idHabitacion" => $idHabitacion];
+    $consulta = $conexion->prepare('SELECT camas.id, camas.cama from camas where camas.idHabitacion = :idHabitacion');
+    $consulta->execute($valores);
+    return $consulta->fetchAll();
+}
+
+function getDatosCamaLibre($conexion,$idCama)
+{
+    $valores = [":idCama" => $idCama];
+    $consulta = $conexion->prepare('SELECT * from camas where id = :idCama AND id NOT IN (SELECT r_registro_camas.idCama FROM r_registro_camas) OR id IN (SELECT r_registro_camas.idCama FROM r_registro_camas where r_registro_camas.fecha_final IS NOT NULL AND r_registro_camas.id = (SELECT MAX(ID) FROM r_registro_camas where r_registro_camas.idCama = :idCama))');
+    $consulta->execute($valores);
+    return $consulta->fetchAll();
+}
