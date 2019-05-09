@@ -14,7 +14,7 @@ require 'routesFunction/obtenerTiposDocumentos.php';
 require 'routesFunction/obtenerPaises.php';
 require 'routesFunction/obtenerSexos.php';
 require 'routesFunction/obtenerCamasLibres.php';
-
+require 'routesFunction/obtenerPersonasFueraDeCasa.php';
 //POST
 require 'routesFunction/forgotPassword.php';
 require 'routesFunction/validateToken.php';
@@ -43,6 +43,7 @@ $app->group('/api', function () use ($app) {
         $app->get('/obtenerPaises', 'obtenerPaises');
         $app->get('/obtenerSexos', 'obtenerSexos');
         $app->get('/obtenerCamasLibres', 'obtenerCamasLibres');
+        $app->get('/obtenerPersonasFueraDeCasa', 'obtenerPersonasFueraDeCasa');
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');
