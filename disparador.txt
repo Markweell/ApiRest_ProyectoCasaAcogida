@@ -1,0 +1,8 @@
+DROP TRIGGER IF EXISTS actualizarNIngreso;
+DELIMITER $$
+    CREATE TRIGGER actualizarNIngreso BEFORE INSERT ON `registro`
+    FOR EACH ROW BEGIN
+      UPDATE config set config.numeros_ingresos = config.numeros_ingresos + 1;
+      SET NEW.numero_ingreso = (SELECT config.numeros_ingresos FROM config);
+    END$$
+DELIMITER ;
