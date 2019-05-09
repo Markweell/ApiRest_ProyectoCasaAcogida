@@ -3,8 +3,8 @@
      * Registra una ficha personal
      */
     function agregarFichaPersonal($response, $request, $next){
-        // if(!validarToken(getTokenOfHeader()))
-        //     return json_encode(["status"=>"SESSION_EXPIRED"]);
+        if(!validarToken(getTokenOfHeader()))
+            return json_encode(["status"=>"SESSION_EXPIRED"]);
         $conexion = \Conexion::getConnection();
         $valores = obtenerDatos($response);
         // if(comprobarDniExistente($conexion,$valores['dni']))
@@ -34,17 +34,18 @@
      */
     function obtenerDatos($response){
         $resp = json_decode($response->getBody());
-        $nombre = $resp->nombre;              
+        $nombre = $resp->nombre ;              
         $apellido1 = $resp->apellido1;
-        $apellido2 = $resp->apellido2;
-        $fechaNacimiento = $resp->fechaNacimiento;
-        $lugarNacimiento = $resp->lugarNacimiento;
+        $apellido2 = $resp->apellido2 ? $resp->apellido2 : null;
+        $fechaNacimiento = $resp->fechaNacimiento ? $resp->fechaNacimiento : null;
+        $lugarNacimiento = $resp->lugarNacimiento ? $resp->lugarNacimiento : null;
         $sexo = $resp->sexo;
-        $nacionalidad = $resp->nacionalidad;
-        $document = $resp->document;
-        $documentType = $resp->documentType;
-        $observaciones = $resp->observaciones;
+        $nacionalidad = $resp->nacionalidad ? $resp->nacionalidad : null;
+        $document = $resp->document ? $resp->document : null;
+        $documentType = $resp->documentType ? $resp->documentType : null;
+        $observaciones = $resp->observaciones ? $resp->observaciones : null;
         $image = $resp->image;
+
         return ['nombre'=>$nombre,'apellido1'=>$apellido1 ,'apellido2'=>$apellido2,'fechaNacimiento'=>$fechaNacimiento,
         'lugarNacimiento'=>$lugarNacimiento,'sexo'=>$sexo,'nacionalidad'=>$nacionalidad,'document'=>$document,
         'documentType'=>$documentType,'observaciones'=>$observaciones, 'image'=>$image,];
@@ -77,12 +78,12 @@
         $valoresConsulta = [":nombre"=>$valores['nombre'], ":apellido1"=>$valores['apellido1'],
         ":apellido2"=>$valores['apellido2'],":fechaNacimiento"=>$valores['fechaNacimiento'],
         ":lugarNacimiento"=>$valores['lugarNacimiento'],":sexo"=>$valores['sexo'],
-        ":nacionalidad"=>$valores['nacionalidad'],":image"=>$urlImagen];
+        ":nacionalidad"=>$valores['nacionalidad'],":observaciones"=>$valores['observaciones'],":image"=>$urlImagen];
         // $valoresConsulta = [":nombre"=>$valores['nombre'],":apellido1"=>$valores['apellido1'],
         // ":apellido2"=>$valores['apellido2']];
         $consulta = $conexion->prepare('INSERT INTO fichas_personas(apellido1,apellido2,nombre,
-        fecha_nacimiento,image,idNacionalidad,idPaisNacimiento,idSexo) 
-        VALUES (:apellido1,:apellido2,:nombre,:fechaNacimiento,:image,:nacionalidad,:lugarNacimiento,:sexo)');
+        fecha_nacimiento,image,idNacionalidad,idPaisNacimiento,idSexo,observaciones) 
+        VALUES (:apellido1,:apellido2,:nombre,:fechaNacimiento,:image,:nacionalidad,:lugarNacimiento,:sexo,:observaciones)');
         // $consulta = $conexion->prepare('INSERT INTO fichas_personas(apellido1,apellido2,nombre) 
         // VALUES (:apellido1,:apellido2,:nombre)');
         return $consulta->execute($valoresConsulta);
