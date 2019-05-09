@@ -21,6 +21,7 @@ require 'routesFunction/validateToken.php';
 require 'routesFunction/changePassword.php';
 require 'routesFunction/validateLogin.php';
 require 'routesFunction/obtenerFichaPersonal.php';
+require 'routesFunction/getRandomToken.php';
 require 'routesFunction/agregarFichaPersonal.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeCreacion.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeEntrada.php';
@@ -37,6 +38,7 @@ $app->group('/api', function () use ($app) {
     $app->group('/v1', function () use ($app) {
 
         $app->get('/obtenerFichasPersonales', 'obtenerFichasPersonales');
+        $app->get('/getRandomToken','getRandomToken'); //Usado para pruebas
         $app->get('/obtenerTiposDocumentos', 'obtenerTiposDocumentos');
         $app->get('/obtenerPaises', 'obtenerPaises');
         $app->get('/obtenerSexos', 'obtenerSexos');
