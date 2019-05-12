@@ -133,3 +133,9 @@ function getDatosCreatedAndUpdated(){
     $idUsuario = getIdOfToken(getTokenOfHeader());
     return ["user"=>$idUsuario, "date"=>$thisDate];
 }
+function getPersonas($conexion)
+{
+    $consulta = $conexion->prepare('SELECT id, nombre, apellido1, apellido2, image FROM `fichas_personas`');
+    $consulta->execute();
+    return $consulta->fetchAll();
+}

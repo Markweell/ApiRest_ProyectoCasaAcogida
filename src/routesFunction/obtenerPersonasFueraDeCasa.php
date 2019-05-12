@@ -7,8 +7,9 @@ function obtenerPersonasFueraDeCasa($response, $request, $next)
 {
     // if(!validarToken(getTokenOfHeader()))
     //     return json_encode(["status"=>"SESSION_EXPIRED"]);
+    $conexion = \Conexion::getConnection();
     $jsonAEnviar = [];
-    $personas = getPersonas();
+    $personas = getPersonas($conexion);
     if (!$personas) 
         return json_encode(["status"=>"DATA_EMPTY"]);
     foreach ($personas as $persona) {
@@ -21,13 +22,6 @@ function obtenerPersonasFueraDeCasa($response, $request, $next)
     return json_encode(["status"=>"DATA_EMPTY"]);
 }
 
-function getPersonas()
-{
-    $conexion = \Conexion::getConnection();
-    $consulta = $conexion->prepare('SELECT id, nombre, apellido1, apellido2, image FROM `fichas_personas`');
-    $consulta->execute();
-    return $consulta->fetchAll();
-}
 
 function getDatosPersona($idPersona)
 {
