@@ -12,8 +12,9 @@
         $valoresCreated = getDatosCreatedAndUpdated(); 
         $id_Ficha_Personal = getLastIdFichaPersonal($conexion);
         $urlImagen = getUrlImagen($valores['image'], $id_Ficha_Personal);
-
-        if(insertarUsuario($valores,$valoresCreated, $conexion, $urlImagen)){
+        if(
+            insertarUsuario($valores,$valoresCreated, $conexion, $urlImagen) & 
+            agregaDocumentacionUsuario($valores, $valoresCreated, $conexion, $id_Ficha_Personal)){
             return json_encode(["status"=>"OPERATION_SUCCESS"]);
         }else
             return json_encode(["status"=>"OPERATION_ERROR"]);
@@ -65,6 +66,7 @@
      * Inserta una ficha personal en la base de datos
      */
     function insertarUsuario($valores, $valoresCreated, $conexion, $urlImagen){
+
         $valoresConsulta = [":nombre"=>$valores['nombre'], ":apellido1"=>$valores['apellido1'],
         ":apellido2"=>$valores['apellido2'],":fechaNacimiento"=>$valores['fechaNacimiento'],
         ":lugarNacimiento"=>$valores['lugarNacimiento'],":sexo"=>$valores['sexo'],
@@ -78,7 +80,25 @@
         VALUES (:apellido1,:apellido2,:nombre,:fechaNacimiento,:image,:nacionalidad,:lugarNacimiento,
         :sexo,:observaciones,:created_at,:idUsuario_created_at,:created_at,:idUsuario_created_at)');
 
-        return $consulta->execute($valoresConsulta);
+        return $consulta->execute($valoresConsulta); 
+    }
+
+    function agregaDocumentacionUsuario($valores, $valoresCreated,$conexion,$id_Ficha_Personal){
+        if($valores['document'] == null || $valores['documentType'] == null){
+            return true;
+        }
+        foreach($valores['document'] as $key=>$document){
+            $valoresConsulta = [':idFichaPersonal'=>$id_Ficha_Personal,':documentType'=>$valores['documentType'][$key],
+            ':document'=>$document, ':created_at'=>$valoresCreated['date'], ":idUsuario_created_at"=>$valoresCreated["user"] ];
+            $consulta = $conexion->prepare('INSERT INTO inf_id_documentacion(idFichaPersonal, idTipoDocumento,
+            numero_documento, created_at, updated_at, idUsuario_created_at, idUsuario_updated_at) 
+            VALUES (:idFichaPersonal, :documentType, :document, :created_at, :created_at, :idUsuario_created_at, :idUsuario_created_at)');
+            if(!($consulta->execute($valoresConsulta))){
+                return false;
+            }
+        }
+        return true; 
+
     }
 
 ?>
