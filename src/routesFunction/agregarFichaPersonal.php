@@ -10,11 +10,12 @@
 
         $valores = obtenerDatos($response);
         $valoresCreated = getDatosCreatedAndUpdated(); 
-        $id_Ficha_Personal = getLastIdFichaPersonal($conexion);
-        $urlImagen = getUrlImagen($valores['image'], $id_Ficha_Personal);
+        $id_ficha_personal = getLastIdFichaPersonal($conexion);
+        $urlImagen = getUrlImagen($valores['image'], $id_ficha_personal);
 
         if(insertarUsuario($valores,$valoresCreated, $conexion, $urlImagen)){
-            return json_encode(["status"=>"OPERATION_SUCCESS"]);
+            return json_encode(["status"=>"OPERATION_SUCCESS", "data"=>["id"=>$id_ficha_personal, 
+            "name"=> $valores['nombre'].' '.$valores['apellido1'].' '.$valores['apellido2']]]);
         }else
             return json_encode(["status"=>"OPERATION_ERROR"]);
     }
@@ -43,12 +44,12 @@
     /**
      * Define la url donde se aloja la foto y construlle el nombre de la foto en base al id de la ficha personal
      */
-    function getUrlImagen($image, $id_Ficha_Personal){
+    function getUrlImagen($image, $id_ficha_personal){
         if($image==''){
             return URL_IMAGE.'image/StandarProfile.png';
         }else{
-            decodeBase64Image($image, $id_Ficha_Personal);
-            return URL_IMAGE.'image/imagenPerfil'.$id_Ficha_Personal.'.'.getExtension(substr($image, 11,1));
+            decodeBase64Image($image, $id_ficha_personal);
+            return URL_IMAGE.'image/imagenPerfil'.$id_ficha_personal.'.'.getExtension(substr($image, 11,1));
         }
     }
     /**

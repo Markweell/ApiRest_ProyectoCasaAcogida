@@ -108,7 +108,7 @@ function auditChange($conexion, $id_usuario,$id_ficha_personal, $description){
 
 function getHabitaciones($conexion)
 {
-    $consulta = $conexion->prepare('SELECT id, habitacion FROM `habitaciones`');
+    $consulta = $conexion->prepare('SELECT habitaciones.id , habitacion, t_tipos_habitaciones.tipo_habitacion FROM `habitaciones`, t_tipos_habitaciones where habitaciones.idTipoHabitacion = t_tipos_habitaciones.id');
     $consulta->execute();
     return $consulta->fetchAll();
 }

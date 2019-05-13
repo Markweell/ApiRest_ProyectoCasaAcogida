@@ -15,7 +15,7 @@ function obtenerOcupacion($response, $request, $next)
     }
     
     foreach ($habitaciones as $habitacion) {
-        $datosHabitacion = ["id" => $habitacion["id"], "room" => $habitacion["habitacion"], "beds" => []];
+        $datosHabitacion = ["id" => $habitacion["id"], "room" => $habitacion["habitacion"], "type" => $habitacion["tipo_habitacion"], "beds" => []];
         $camas = getCamasHabitacion($conexion, $habitacion["id"]);
         if (!$camas) 
             return;
