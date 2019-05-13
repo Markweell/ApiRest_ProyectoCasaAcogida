@@ -12,11 +12,11 @@
         $valoresCreated = getDatosCreatedAndUpdated(); 
         $id_Ficha_Personal = getLastIdFichaPersonal($conexion);
         $urlImagen = getUrlImagen($valores['image'], $id_Ficha_Personal);
-        
+
         if(
             insertarUsuario($valores,$valoresCreated, $conexion, $urlImagen) & 
             agregaDocumentacionUsuario($valores, $valoresCreated, $conexion, $id_Ficha_Personal)){
-                return json_encode(["status"=>"OPERATION_SUCCESS", "data"=>["id"=>$id_ficha_personal, 
+                return json_encode(["status"=>"OPERATION_SUCCESS", "data"=>["id"=>$id_Ficha_Personal, 
                 "name"=> $valores['nombre'].' '.$valores['apellido1'].' '.$valores['apellido2']]]);
         }else
             return json_encode(["status"=>"OPERATION_ERROR"]);
