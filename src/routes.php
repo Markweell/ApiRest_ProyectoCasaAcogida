@@ -23,7 +23,7 @@ require 'routesFunction/validateToken.php';
 require 'routesFunction/changePassword.php';
 require 'routesFunction/validateLogin.php';
 require 'routesFunction/obtenerFichaPersonal.php';
-require 'routesFunction/getRandomToken.php'; //esta hay que borrarla
+require 'routesFunction/getRandomToken.php'; //esta también
 require 'routesFunction/agregarFichaPersonal.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeCreacion.php';
 require 'routesFunction/obtenerFichasPersonalesPorFechaDeEntrada.php';
