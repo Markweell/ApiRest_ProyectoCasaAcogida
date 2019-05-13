@@ -48,7 +48,7 @@ $app->group('/api', function () use ($app) {
         $app->get('/obtenerCamasLibres', 'obtenerCamasLibres');
         $app->get('/obtenerPersonasFueraDeCasa', 'obtenerPersonasFueraDeCasa');
         $app->get('/obtenerOcupacion', 'obtenerOcupacion');
-        $app->post('/prueba','pruebasPhp');
+        $app->post('/prueba','pruebasPhp'); //Usado para pruebas
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');
