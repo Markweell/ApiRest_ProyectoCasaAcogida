@@ -26,7 +26,7 @@
         $resp = json_decode($response->getBody());
         $nombre = $resp->nombre ;              
         $apellido1 = $resp->apellido1;
-        $apellido2 = $resp->apellido2 ? $resp->apellido2 : null;
+        $apellido2 = $resp->apellido2 ? $resp->apellido2 : '';
         $fechaNacimiento = $resp->fechaNacimiento ? $resp->fechaNacimiento : null;
         $lugarNacimiento = $resp->lugarNacimiento ? $resp->lugarNacimiento : null;
         $sexo = $resp->sexo;
@@ -74,9 +74,9 @@
 
         $consulta = $conexion->prepare('INSERT INTO fichas_personas(apellido1,apellido2,nombre,
         fecha_nacimiento,image,idNacionalidad,idPaisNacimiento,idSexo,observaciones,created_at,
-        idUsuario_created_at) 
+        idUsuario_created_at,updated_at, idUsuario_updated_at) 
         VALUES (:apellido1,:apellido2,:nombre,:fechaNacimiento,:image,:nacionalidad,:lugarNacimiento,
-        :sexo,:observaciones,:created_at,:idUsuario_created_at)');
+        :sexo,:observaciones,:created_at,:idUsuario_created_at,:created_at,:idUsuario_created_at)');
 
         return $consulta->execute($valoresConsulta);
     }
