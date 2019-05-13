@@ -6,27 +6,26 @@ function obtenerFichaPersonal($response, $request, $next){
     $conexion = \Conexion::getConnection();
     $resp = json_decode($response->getBody());
     $id = $resp->id;
-    $consulta = $conexion->prepare('SELECT * FROM fichas_personas WHERE id = :id');
+    $consulta = $conexion->prepare(
+        'SELECT 
+            fichas_personas.*,
+            t_paises1.nacionalidad,
+            t_sexo.sexo,
+            t_paises2.nacionalidad as "lugarNacimiento"
+        FROM fichas_personas 
+            LEFT JOIN t_paises AS t_paises1 
+                ON fichas_personas.idNacionalidad = t_paises1.id 
+            LEFT JOIN t_sexo 
+                ON fichas_personas.idSexo = t_sexo.id 
+            LEFT JOIN t_paises AS t_paises2 
+                ON fichas_personas.idPaisNacimiento = t_paises2.id 
+        WHERE fichas_personas.id = :id');
+        
     $consulta->execute([':id'=>$id]);
     $resultadoMainData=$consulta->fetchAll();
-    if($resultadoMainData===[])
-        return json_encode(["status"=>"DATA_EMPTY"]);
-    if($resultadoMainData[0]['idNacionalidad']){
-        $resultadoMainData[0]['nacionalidad'] = subConsulta($conexion,'nacionalidad','t_paises',$resultadoMainData[0]['idNacionalidad'])['nacionalidad'];
-    }
-    if($resultadoMainData[0]['idPaisNacimiento']){
-        $resultadoMainData[0]['paisNacimiento'] = subConsulta($conexion,'nacionalidad','t_paises',$resultadoMainData[0]['idPaisNacimiento'])['nacionalidad'];
-    }
-    if($resultadoMainData[0]['idSexo']){
-        $resultadoMainData[0]['sexo'] = subConsulta($conexion,'sexo','t_sexo',$resultadoMainData[0]['idSexo'])['sexo'];
-    }
+
     if($resultadoMainData)
-        return json_encode(["status"=>"OPERATION_SUCCESS", "data" =>['mainData'=>$resultadoMainData]]);
-}
-function subConsulta($conexion,$campo,$tabla,$id){
-    $consulta = $conexion->prepare('SELECT '.$campo.' FROM '.$tabla.' WHERE id = :id');
-    $consulta->execute([':id'=>$id]);
-    $resultadoConsulta=$consulta->fetchAll();
-    return $resultadoConsulta[0];
+        return json_encode(["status"=>"OPERATION_SUCCESS",
+                            "data" =>['mainData'=>$resultadoMainData]]);
 }
 ?>
