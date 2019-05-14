@@ -6,3 +6,15 @@ DELIMITER $$
       SET NEW.numero_ingreso = (SELECT config.numeros_ingresos FROM config);
     END$$
 DELIMITER ;
+
+
+DROP TRIGGER IF EXISTS actualizarNExpediente;
+DELIMITER $$
+    CREATE TRIGGER actualizarNExpediente AFTER INSERT ON `registro`
+    FOR EACH ROW BEGIN
+    	DECLARE vNumeroExpedientes INT;
+      	UPDATE config set config.numeros_expedientes_tecnicos = numeros_expedientes_tecnicos + 1, config.numeros_expedientes_centro = numeros_expedientes_centro + 1;
+        SET vNumeroExpedientes = (SELECT config.numeros_expedientes_tecnicos FROM config);
+      	INSERT INTO expedientes_evaluacion (expedientes_evaluacion.idRegistro,expedientes_evaluacion.numero_expediente_tecnico,expedientes_evaluacion.numero_expediente_centro, expedientes_evaluacion. numero_ingreso) VALUES(new.id,vNumeroExpedientes,vNumeroExpedientes,new.numero_ingreso);
+    END$$
+DELIMITER ;

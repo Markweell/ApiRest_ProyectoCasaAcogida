@@ -17,6 +17,7 @@ require 'routesFunction/obtenerCamasLibres.php';
 require 'routesFunction/obtenerPersonasFueraDeCasa.php';
 require 'routesFunction/obtenerPersonasEnCasa.php';
 require 'routesFunction/obtenerOcupacion.php';
+require 'routesFunction/obtenerExpedientesEvaluacionDePersonasEnCasa.php';
 //POST
 require 'routesFunction/pruebasPhp.php'; // esta hay que borrarla
 require 'routesFunction/forgotPassword.php';
@@ -50,6 +51,7 @@ $app->group('/api', function () use ($app) {
         $app->get('/obtenerPersonasFueraDeCasa', 'obtenerPersonasFueraDeCasa');
         $app->get('/obtenerPersonasEnCasa', 'obtenerPersonasEnCasa');
         $app->get('/obtenerOcupacion', 'obtenerOcupacion');
+        $app->get('/obtenerExpedientesEvaluacionDePersonasEnCasa', 'obtenerExpedientesEvaluacionDePersonasEnCasa');
         $app->post('/prueba','pruebasPhp'); //Usado para pruebas
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');

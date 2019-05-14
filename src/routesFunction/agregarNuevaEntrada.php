@@ -72,7 +72,7 @@
      * Inserta un registro de entrada
      */
     function insertarRegistro($valores, $conexion){
-        $valoresConsulta = [
+        $valoresConsulta = [ 
             ":fecha_ingreso"=>$valores['fecha_ingreso'], 
             ":created_updated"=>$valores['created_updated'],
             ":idUsuario_created_updated"=>$valores['idConserje'],
