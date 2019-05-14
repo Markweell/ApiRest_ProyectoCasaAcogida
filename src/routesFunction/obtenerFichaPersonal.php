@@ -57,11 +57,11 @@ function obtenerFichaPersonal($response, $request, $next){
     $consulta->execute($valor);
     $resultadoMainData=$consulta->fetchAll();
 
-    return json_encode(obtenerFechas_ingreso($conexion,$resultadoMainData,$valor));
+    $resultadoFechas = obtenerFechas_ingreso($conexion,$resultadoMainData,$valor);
 
     if($resultadoMainData)
         return json_encode(["status"=>"OPERATION_SUCCESS",
-                            "data" =>['mainData'=>$resultadoMainData,'']]);
+                            "data" =>['mainData'=>$resultadoMainData,'fechas'=>$resultadoFechas]]);
 }
 function obtenerFechas_ingreso($conexion,$array,$valor){
     $consulta = $conexion->prepare('SELECT * FROM `registro` WHERE idFichaPersona = :id ORDER BY `registro`.`fecha_ingreso` ASC');
@@ -74,19 +74,12 @@ function obtenerFechas_ingreso($conexion,$array,$valor){
         $consulta->execute([':id'=>$value['id']]);
         $resultadoMainData=$consulta->fetchAll();
         foreach ($resultadoMainData as $key1 => $value1) {
-            $estancia=['nHabitacion'=>$value1['habitacion'],'nCama'=>$value1['cama']];
+            $estancia=['nHabitacion'=>$value1['habitacion'],'nCama'=>$value1['cama'], 'fechaInicioCama'=>$value1['fecha_inicio'], 'fechaFinalCama'=>$value1['fecha_final']];
             array_push($fechasIngreso['estancia'],$estancia);
         }
         array_push($datos, $fechasIngreso);
     }
-    
     return $datos;
 }
-function obtenerFechas_salida($array){
-    $fechas = [];
-    foreach ($array as $key => $value) {
-        array_push($fechas, $value['fecha_salida']);
-    }
-    return $fechas;
-}
+
 ?>
