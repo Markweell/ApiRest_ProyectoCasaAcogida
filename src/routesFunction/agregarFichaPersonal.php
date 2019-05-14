@@ -10,13 +10,13 @@
 
         $valores = obtenerDatos($response);
         $valoresCreated = getDatosCreatedAndUpdated(); 
-        $id_Ficha_Personal = getLastIdFichaPersonal($conexion);
-        $urlImagen = getUrlImagen($valores['image'], $id_Ficha_Personal);
+        $id_ficha_personal = getLastIdFichaPersonal($conexion);
+        $urlImagen = getUrlImagen($valores['image'], $id_ficha_personal);
 
         if(
-            insertarUsuario($valores,$valoresCreated, $conexion, $urlImagen) & 
-            agregaDocumentacionUsuario($valores, $valoresCreated, $conexion, $id_Ficha_Personal)){
-                return json_encode(["status"=>"OPERATION_SUCCESS", "data"=>["id"=>$id_Ficha_Personal, 
+            insertarUsuario($valores,$valoresCreated, $conexion, $urlImagen) &
+            agregaDocumentacionUsuario($valores, $valoresCreated, $conexion, $id_ficha_personal)){
+                return json_encode(["status"=>"OPERATION_SUCCESS", "data"=>["id"=>$id_ficha_personal, 
                 "name"=> $valores['nombre'].' '.$valores['apellido1'].' '.$valores['apellido2']]]);
         }else
             return json_encode(["status"=>"OPERATION_ERROR"]);
@@ -32,7 +32,7 @@
         $apellido2 = $resp->apellido2 ? $resp->apellido2 : '';
         $fechaNacimiento = $resp->fechaNacimiento ? $resp->fechaNacimiento : null;
         $lugarNacimiento = $resp->lugarNacimiento ? $resp->lugarNacimiento : null;
-        $sexo = $resp->sexo;
+        $sexo = $resp->sexo ? $resp->sexo : null;
         $nacionalidad = $resp->nacionalidad ? $resp->nacionalidad : null;
         $document = $resp->document ? $resp->document : null;
         $documentType = $resp->documentType ? $resp->documentType : null;
@@ -85,12 +85,12 @@
         return $consulta->execute($valoresConsulta); 
     }
 
-    function agregaDocumentacionUsuario($valores, $valoresCreated,$conexion,$id_Ficha_Personal){
-        if($valores['document'] == null || $valores['documentType'] == null){
+    function agregaDocumentacionUsuario($valores, $valoresCreated,$conexion,$id_ficha_personal){
+        if($valores['document'] == [""] || $valores['documentType'] == [""]){
             return true;
         }
         foreach($valores['document'] as $key=>$document){
-            $valoresConsulta = [':idFichaPersonal'=>$id_Ficha_Personal,':documentType'=>$valores['documentType'][$key],
+            $valoresConsulta = [':idFichaPersonal'=>$id_ficha_personal,':documentType'=>$valores['documentType'][$key],
             ':document'=>$document, ':created_at'=>$valoresCreated['date'], ":idUsuario_created_at"=>$valoresCreated["user"] ];
             $consulta = $conexion->prepare('INSERT INTO inf_id_documentacion(idFichaPersonal, idTipoDocumento,
             numero_documento, created_at, updated_at, idUsuario_created_at, idUsuario_updated_at) 

@@ -1,8 +1,8 @@
 <?php
 
 function obtenerFichaPersonal($response, $request, $next){
-    if(!validarToken(getTokenOfHeader()))
-        return json_encode(["status"=>"SESSION_EXPIRED"]);
+    // if(!validarToken(getTokenOfHeader()))
+    //     return json_encode(["status"=>"SESSION_EXPIRED"]);
     $conexion = \Conexion::getConnection();
     $resp = json_decode($response->getBody());
     $id = $resp->id;
@@ -57,8 +57,36 @@ function obtenerFichaPersonal($response, $request, $next){
     $consulta->execute($valor);
     $resultadoMainData=$consulta->fetchAll();
 
+    return json_encode(obtenerFechas_ingreso($conexion,$resultadoMainData,$valor));
+
     if($resultadoMainData)
         return json_encode(["status"=>"OPERATION_SUCCESS",
-                            "data" =>['mainData'=>$resultadoMainData]]);
+                            "data" =>['mainData'=>$resultadoMainData,'']]);
+}
+function obtenerFechas_ingreso($conexion,$array,$valor){
+    $consulta = $conexion->prepare('SELECT * FROM `registro` WHERE idFichaPersona = :id ORDER BY `registro`.`fecha_ingreso` ASC');
+    $consulta->execute($valor);
+    $resultadoMainData=$consulta->fetchAll();
+    $datos = [];
+    foreach ($resultadoMainData as $key => $value) {
+        $fechasIngreso = ['nRegistro'=>$key+1,'fechaEntrada'=>$value['fecha_ingreso'],'fechaSalida'=>$value['fecha_salida'], 'estancia'=>[]];
+        $consulta = $conexion->prepare('SELECT * FROM r_registro_camas, camas, habitaciones  WHERE r_registro_camas.idCama = camas.id AND camas.idHabitacion=habitaciones.id AND r_registro_camas.idRegistro = :id ');
+        $consulta->execute([':id'=>$value['id']]);
+        $resultadoMainData=$consulta->fetchAll();
+        foreach ($resultadoMainData as $key1 => $value1) {
+            $estancia=['nHabitacion'=>$value1['habitacion'],'nCama'=>$value1['cama']];
+            array_push($fechasIngreso['estancia'],$estancia);
+        }
+        array_push($datos, $fechasIngreso);
+    }
+    
+    return $datos;
+}
+function obtenerFechas_salida($array){
+    $fechas = [];
+    foreach ($array as $key => $value) {
+        array_push($fechas, $value['fecha_salida']);
+    }
+    return $fechas;
 }
 ?>
