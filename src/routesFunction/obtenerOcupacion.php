@@ -29,7 +29,7 @@ function obtenerOcupacion($response, $request, $next)
                 array_push($datosHabitacion["beds"], ["number" => $numeroCama, "occupant" => '']);
             else{
                 $fecha_final = $registroCama[0]["fecha_final"];
-                if($fecha_final && strtotime($fecha_final) < strtotime(date("d-m-Y"))){
+                if($fecha_final && strtotime($fecha_final) <= strtotime(date("d-m-Y"))){
                     array_push($datosHabitacion["beds"], ["number" => $numeroCama, "occupant" => '']);
                 } else {
                     $idRegistro = $registroCama[0]['idRegistro'];
