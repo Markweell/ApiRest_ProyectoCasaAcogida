@@ -41,22 +41,6 @@
             'idPersonalFile'=>$idPersonalFile,
             'idRoom'=>$idRoom];
     }
-    /**
-     * Inserta una cama a un registro
-     */
-    function insertarCama($valores, $idRegistro, $conexion){
-        $valoresConsulta = [
-            ":idCama"=>$valores['idBed'], 
-            ":idRegistro"=>$idRegistro,
-            ":fecha_inicio"=>$valores['fecha_inicio'],
-            ":created_updated"=>$valores['created_updated'],
-            ":idUsuario_created_updated"=>$valores['idConserje']];
-
-        $consulta = $conexion->prepare('INSERT INTO r_registro_camas(idCama,idRegistro,
-        fecha_inicio,created_at,updated_at,idUsuario_created_at,idUsuario_updated_at) 
-        VALUES (:idCama,:idRegistro,:fecha_inicio,:created_updated,:created_updated,:idUsuario_created_updated,:idUsuario_created_updated)');
-        return $consulta->execute($valoresConsulta);
-    }
 
     // /**
     //  * Obtiene el último id de la tabla ficha_personal

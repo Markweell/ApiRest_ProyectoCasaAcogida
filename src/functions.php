@@ -141,8 +141,42 @@ function getPersonas($conexion)
 }
 function getPersonasEnCasa($conexion)
 {
-
-    $consulta = $conexion->prepare('SELECT fichas_personas.id, registro.id as "idRegistro", fichas_personas.image, fichas_personas.nombre as "name", fichas_personas.apellido1 as "surname1", fichas_personas.apellido2 as "surname2", registro.fecha_ingreso as "entry_date", registro.fecha_salida as "departure_date", habitaciones.habitacion as "room", camas.cama as "bed" FROM fichas_personas, registro, r_registro_camas, camas, habitaciones WHERE fichas_personas.id = registro.idFichaPersona AND registro.id = r_registro_camas.idRegistro AND r_registro_camas.idCama = camas.id AND camas.idHabitacion = habitaciones.id AND (registro.fecha_salida IS NULL OR registro.fecha_salida > CURDATE())');
+    $consulta = $conexion->prepare('SELECT fichas_personas.id, registro.id as "idRegistro", r_registro_camas.id as "idRegistroCama", fichas_personas.image, fichas_personas.nombre as "name", fichas_personas.apellido1 as "surname1", fichas_personas.apellido2 as "surname2", registro.fecha_ingreso as "entry_date", registro.fecha_salida as "departure_date", habitaciones.habitacion as "room", camas.cama as "bed" FROM fichas_personas, registro, r_registro_camas, camas, habitaciones WHERE fichas_personas.id = registro.idFichaPersona AND registro.id = r_registro_camas.idRegistro AND r_registro_camas.idCama = camas.id AND camas.idHabitacion = habitaciones.id AND r_registro_camas.id = (SELECT MAX(ID) FROM r_registro_camas where r_registro_camas.idRegistro = registro.id) AND (registro.fecha_salida IS NULL OR registro.fecha_salida > CURDATE())');
     $consulta->execute();
     return $consulta->fetchAll();
 }
+function capitalize($string){
+    $subString = explode(' ',$string);
+    $stringResultant='';
+    foreach ($subString as $key => $value) {
+        if ($value != ''){
+            $value=substr(strtoupper($value),0,1).substr(strtolower($value),1);
+            $stringResultant = $stringResultant.$value.' '; 
+        }
+    } 
+    return trim($stringResultant);
+}
+
+
+function dejarCama($valores, $conexion){
+    $valoresConsulta = [ 
+        ":fecha_salida"=>$valores['fecha_salida'], 
+        ":updated"=>$valores['updated'],
+        ":idRegistroCama"=>$valores['idRegistroCama'],
+        ":idUserUpdated"=>$valores['idUserUpdated']];
+    $consulta = $conexion->prepare('UPDATE r_registro_camas SET r_registro_camas.fecha_final = :fecha_salida, r_registro_camas.updated_at = :updated, r_registro_camas.idUsuario_updated_at = :idUserUpdated WHERE r_registro_camas.id = :idRegistroCama');
+    return $consulta->execute($valoresConsulta);
+}
+function insertarCama($valores, $idRegistro, $conexion){
+    $valoresConsulta = [
+        ":idCama"=>$valores['idBed'], 
+        ":idRegistro"=>$idRegistro,
+        ":fecha_inicio"=>$valores['fecha_inicio'],
+        ":created_updated"=>$valores['created_updated'],
+        ":idUsuario_created_updated"=>$valores['idConserje']];
+    $consulta = $conexion->prepare('INSERT INTO r_registro_camas(idCama,idRegistro,
+    fecha_inicio,created_at,updated_at,idUsuario_created_at,idUsuario_updated_at) 
+    VALUES (:idCama,:idRegistro,:fecha_inicio,:created_updated,:created_updated,:idUsuario_created_updated,:idUsuario_created_updated)');
+    return $consulta->execute($valoresConsulta);
+}
+

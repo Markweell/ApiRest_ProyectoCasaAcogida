@@ -39,7 +39,7 @@
         $observaciones = $resp->observaciones ? $resp->observaciones : null;
         $image = $resp->image;
 
-        return ['nombre'=>$nombre,'apellido1'=>$apellido1 ,'apellido2'=>$apellido2,'fechaNacimiento'=>$fechaNacimiento,
+        return ['nombre'=>capitalize($nombre),'apellido1'=>capitalize($apellido1) ,'apellido2'=>capitalize($apellido2),'fechaNacimiento'=>$fechaNacimiento,
         'lugarNacimiento'=>$lugarNacimiento,'sexo'=>$sexo,'nacionalidad'=>$nacionalidad,'document'=>$document,
         'documentType'=>$documentType,'observaciones'=>$observaciones, 'image'=>$image];
     }
