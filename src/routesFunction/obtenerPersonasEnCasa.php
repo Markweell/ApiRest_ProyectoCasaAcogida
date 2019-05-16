@@ -1,6 +1,6 @@
 <?php
 /**
- * Obtiene todas los sexos de la tabla t_sexo.
+ * Obtiene todas las personas que se encuentran en la casa a día de hoy.
  * @return Object con un status que define el exito o fracaso de la operación. Si la operación tuvo éxito este objeto tiene un clave 'data' con el resultado de la consulta.
  */
 function obtenerPersonasEnCasa($response, $request, $next)
