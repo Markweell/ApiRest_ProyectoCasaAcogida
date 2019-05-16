@@ -7,7 +7,7 @@ function obtenerFichaPersonal($response, $request, $next){
     $resp = json_decode($response->getBody());
     $id = $resp->id;
     $valor=[':id'=>$id];
-    
+
     $consulta = $conexion->prepare(
         'SELECT 
             fichas_personas.*,
@@ -28,7 +28,13 @@ function obtenerFichaPersonal($response, $request, $next){
     $resultadoDocumentacion = obtenerDocumentacion($conexion,$valor);
     if($resultadoMainData)
         return json_encode(["status"=>"OPERATION_SUCCESS",
-                            "data" =>['mainData'=>$resultadoMainData,'fechas'=>$resultadoFechas['datos'], 'camaActual'=>$resultadoFechas['camaActual'], 'habitacionActual'=>$resultadoFechas['habitacionActual'], 'documentacion'=>$resultadoDocumentacion]]);
+                            "data" =>[  'mainData'=>$resultadoMainData,
+                                        'fechas'=>$resultadoFechas['datos'],
+                                        'camaActual'=>$resultadoFechas['camaActual'],
+                                        'habitacionActual'=>$resultadoFechas['habitacionActual'],
+                                        'idRegistroCama'=>$resultadoFechas['idRegistroCama'],
+                                        'idRegistro'=>$resultadoFechas['idRegistro'],
+                                        'documentacion'=>$resultadoDocumentacion]]);
 }
 
 function obtenerFechas_ingreso($conexion,$valor){
@@ -37,14 +43,17 @@ function obtenerFechas_ingreso($conexion,$valor){
     $resultadoMainData=$consulta->fetchAll();
     $habitacionActual = '';
     $camaActual = '';
+    $idRegistroCama = '';
+    $idRegistro = '';
     $datos = [];
+    
     foreach ($resultadoMainData as $key => $value) {
         $fechasIngreso = [  'nRegistro'=>$key+1,
                             'fechaEntrada'=>$value['fecha_ingreso'],
                             'fechaSalida'=>$value['fecha_salida'],
                             'estancia'=>[]];
         $consulta = $conexion->prepare(
-            'SELECT * FROM r_registro_camas,
+            'SELECT  r_registro_camas.*,camas.cama,habitaciones.habitacion FROM r_registro_camas,
                         camas,
                         habitaciones  
             WHERE r_registro_camas.idCama = camas.id 
@@ -53,9 +62,12 @@ function obtenerFechas_ingreso($conexion,$valor){
         $consulta->execute([':id'=>$value['id']]);
         $resultadoMainData=$consulta->fetchAll();
         foreach ($resultadoMainData as $key1 => $value1) {
+            
             if($value1['fecha_final'] == null || strtotime($value1['fecha_final'])>time()){
                 $habitacionActual = $value1['habitacion'];
                 $camaActual = $value1['cama'];
+                $idRegistroCama = $value1['id'];
+                $idRegistro = $value1['idRegistro'];
             }
             $estancia=[ 'nHabitacion'=>$value1['habitacion'],
                         'nCama'=>$value1['cama'],
@@ -65,7 +77,7 @@ function obtenerFechas_ingreso($conexion,$valor){
         }
         array_push($datos, $fechasIngreso);
     }
-    return ['datos'=>$datos, 'camaActual'=>$camaActual, 'habitacionActual'=>$habitacionActual];
+    return ['datos'=>$datos, 'camaActual'=>$camaActual, 'habitacionActual'=>$habitacionActual, 'idRegistroCama'=>$idRegistroCama, 'idRegistro'=>$idRegistro];
 }
 function obtenerDocumentacion($conexion,$valor){
     $consulta = $conexion->prepare('SELECT t_tipos_documento.documento, inf_id_documentacion.numero_documento FROM inf_id_documentacion, t_tipos_documento WHERE inf_id_documentacion.idFichaPersonal = :id AND inf_id_documentacion.idTipoDocumento = t_tipos_documento.id');
