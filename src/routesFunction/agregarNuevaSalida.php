@@ -41,19 +41,6 @@
         ];
     }
     /**
-     * Inserta una cama a un registro
-     */
-    function dejarCama($valores, $conexion){
-        $valoresConsulta = [ 
-            ":fecha_salida"=>$valores['fecha_salida'], 
-            ":updated"=>$valores['updated'],
-            ":idRegistroCama"=>$valores['idRegistroCama'],
-            ":idUserUpdated"=>$valores['idUserUpdated']];
-        $consulta = $conexion->prepare('UPDATE r_registro_camas SET r_registro_camas.fecha_final = :fecha_salida, r_registro_camas.updated_at = :updated, r_registro_camas.idUsuario_updated_at = :idUserUpdated WHERE r_registro_camas.id = :idRegistroCama');
-        return $consulta->execute($valoresConsulta);
-    }
-
-    /**
      * Inserta un registro de entrada
      */
     function insertarSalida($valores, $conexion){
