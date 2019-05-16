@@ -146,3 +146,26 @@ function getPersonasEnCasa($conexion)
     $consulta->execute();
     return $consulta->fetchAll();
 }
+
+function dejarCama($valores, $conexion){
+    $valoresConsulta = [ 
+        ":fecha_salida"=>$valores['fecha_salida'], 
+        ":updated"=>$valores['updated'],
+        ":idRegistroCama"=>$valores['idRegistroCama'],
+        ":idUserUpdated"=>$valores['idUserUpdated']];
+    $consulta = $conexion->prepare('UPDATE r_registro_camas SET r_registro_camas.fecha_final = :fecha_salida, r_registro_camas.updated_at = :updated, r_registro_camas.idUsuario_updated_at = :idUserUpdated WHERE r_registro_camas.id = :idRegistroCama');
+    return $consulta->execute($valoresConsulta);
+}
+function insertarCama($valores, $idRegistro, $conexion){
+    $valoresConsulta = [
+        ":idCama"=>$valores['idBed'], 
+        ":idRegistro"=>$idRegistro,
+        ":fecha_inicio"=>$valores['fecha_inicio'],
+        ":created_updated"=>$valores['created_updated'],
+        ":idUsuario_created_updated"=>$valores['idConserje']];
+    $consulta = $conexion->prepare('INSERT INTO r_registro_camas(idCama,idRegistro,
+    fecha_inicio,created_at,updated_at,idUsuario_created_at,idUsuario_updated_at) 
+    VALUES (:idCama,:idRegistro,:fecha_inicio,:created_updated,:created_updated,:idUsuario_created_updated,:idUsuario_created_updated)');
+    return $consulta->execute($valoresConsulta);
+}
+
