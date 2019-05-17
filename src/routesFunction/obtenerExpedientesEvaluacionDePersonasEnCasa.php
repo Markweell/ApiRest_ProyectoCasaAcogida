@@ -26,7 +26,7 @@ function obtenerExpedientesEvaluacionDePersonasEnCasa($response, $request, $next
                  else
                     $expedienteComenzado = true;
 
-            array_push($jsonAEnviar, ["id"=>$persona['id'],"image"=>$persona['image'],"name"=>$persona['name'],
+            array_push($jsonAEnviar, ["id"=>$persona['id'], "idExpedient"=>$datosExpedienteRegistro["idExpedient"],"image"=>$persona['image'],"name"=>$persona['name'],
                 "surname1"=>$persona['surname1'],"surname2"=>$persona['surname2'],"entry_date"=>$persona["entry_date"],"expedient_started"=>$expedienteComenzado]);
             }
         }
@@ -37,7 +37,7 @@ function obtenerExpedientesEvaluacionDePersonasEnCasa($response, $request, $next
 function getDatosExpedienteRegistro($conexion,$idRegistro)
 {
     $valores = [":idRegistro" => $idRegistro];
-    $consulta = $conexion->prepare('SELECT id, created_at FROM expedientes_evaluacion WHERE expedientes_evaluacion.idRegistro = :idRegistro');
+    $consulta = $conexion->prepare('SELECT id as "idExpedient", created_at FROM expedientes_evaluacion WHERE expedientes_evaluacion.idRegistro = :idRegistro');
     $consulta->execute($valores);
     return $consulta->fetch();
 }
