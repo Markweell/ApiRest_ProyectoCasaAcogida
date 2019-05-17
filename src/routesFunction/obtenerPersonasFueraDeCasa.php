@@ -27,7 +27,8 @@ function getDatosPersona($idPersona)
 {
     $conexion = \Conexion::getConnection();
     $valores = [":idPersona" => $idPersona];
-    $consulta = $conexion->prepare('SELECT id, nombre, apellido1, apellido2, image from fichas_personas where id = :idPersona AND id NOT IN (SELECT registro.idFichaPersona FROM registro) OR id IN (SELECT registro.idFichaPersona FROM registro where registro.fecha_salida IS NOT NULL AND registro.fecha_salida < CURDATE() AND registro.id = (SELECT MAX(ID) FROM registro where registro.idFichaPersona = :idPersona))');
+    $consulta = $conexion->prepare('SELECT id, nombre, apellido1, apellido2, image from fichas_personas where id = :idPersona AND id NOT IN (SELECT registro.idFichaPersona FROM registro) OR id IN (SELECT registro.idFichaPersona FROM registro where registro.fecha_salida IS NOT NULL AND registro.id = (SELECT MAX(ID) FROM registro where registro.idFichaPersona = :idPersona))');
+    //$consulta = $conexion->prepare('SELECT id, nombre, apellido1, apellido2, image from fichas_personas where id = :idPersona AND id NOT IN (SELECT registro.idFichaPersona FROM registro) OR id IN (SELECT registro.idFichaPersona FROM registro where registro.fecha_salida IS NOT NULL AND registro.fecha_salida <= CURDATE() AND registro.id = (SELECT MAX(ID) FROM registro where registro.idFichaPersona = :idPersona))');
     $consulta->execute($valores);
     return $consulta->fetchAll();
 }

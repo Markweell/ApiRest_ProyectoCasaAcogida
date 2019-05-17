@@ -15,17 +15,20 @@ function obtenerExpedientesEvaluacionDePersonasEnCasa($response, $request, $next
     }
     
     foreach ($personasEnCasa as $persona) {
-        $datosExpedienteRegistro = getDatosExpedienteRegistro($conexion, $persona["idRegistro"]);
-        $estadoExpediente;
-        //var_dump($datosExpedienteRegistro);-+
-        if($datosExpedienteRegistro){
-            if($datosExpedienteRegistro["created_at"] == NULL)
-                $expedienteComenzado = false;
-        else
-            $expedienteComenzado = true;
+        //var_dump($persona);
+        if($persona["departure_date"] == NULL){
+            $datosExpedienteRegistro = getDatosExpedienteRegistro($conexion, $persona["idRegistro"]);
+            $estadoExpediente;
+            //var_dump($datosExpedienteRegistro);-+
+            if($datosExpedienteRegistro){
+                if($datosExpedienteRegistro["created_at"] == NULL)
+                    $expedienteComenzado = false;
+                 else
+                    $expedienteComenzado = true;
 
-        array_push($jsonAEnviar, ["id"=>$persona['id'],"image"=>$persona['image'],"name"=>$persona['name'],
-            "surname1"=>$persona['surname1'],"surname2"=>$persona['surname2'],"entry_date"=>$persona["entry_date"],"expedient_started"=>$expedienteComenzado]);
+            array_push($jsonAEnviar, ["id"=>$persona['id'], "idExpedient"=>$datosExpedienteRegistro["idExpedient"],"image"=>$persona['image'],"name"=>$persona['name'],
+                "surname1"=>$persona['surname1'],"surname2"=>$persona['surname2'],"entry_date"=>$persona["entry_date"],"expedient_started"=>$expedienteComenzado]);
+            }
         }
     }
     return json_encode(["status"=>"OPERATION_SUCCESS","data"=> $jsonAEnviar]);
@@ -34,7 +37,7 @@ function obtenerExpedientesEvaluacionDePersonasEnCasa($response, $request, $next
 function getDatosExpedienteRegistro($conexion,$idRegistro)
 {
     $valores = [":idRegistro" => $idRegistro];
-    $consulta = $conexion->prepare('SELECT id, created_at FROM expedientes_evaluacion WHERE expedientes_evaluacion.idRegistro = :idRegistro');
+    $consulta = $conexion->prepare('SELECT id as "idExpedient", created_at FROM expedientes_evaluacion WHERE expedientes_evaluacion.idRegistro = :idRegistro');
     $consulta->execute($valores);
     return $consulta->fetch();
 }
