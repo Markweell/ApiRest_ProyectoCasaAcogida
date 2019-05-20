@@ -1,4 +1,6 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
     /**
      * Recoge un email de una peticion post, se comprueba que este está en la base de datos y si lo está se le genera
      * un token y se le envia un correo con ese token.
@@ -11,7 +13,7 @@
         $resultadoBusqueda=$consulta->fetch();
         $idUsuario = $resultadoBusqueda['id'];
         $nombreUsuario = $resultadoBusqueda['nombre'];
-
+        
         if(!$resultadoBusqueda)
             return json_encode(false);
     
@@ -27,8 +29,8 @@
         <a href="http://localhost:4200/change_password/'.$token.'">http://localhost:4200/change_password/'.$token.'</a>. 
         Si no has iniciado esta solicitud, ignore este mensaje.</p>
         <p>Saludos</p>';
-        
-        return json_encode(sendEmail($email, $asunto, $body));
+       
+        return json_encode(sendEmail($valores[":email"], $asunto, $body));
     }
     function obtieneValores($response){
         $variable = json_decode($response->getBody());
