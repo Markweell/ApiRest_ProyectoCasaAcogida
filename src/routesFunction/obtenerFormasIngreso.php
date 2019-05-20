@@ -1,4 +1,5 @@
 <?php
+
 function obtenerFormasIngreso(){
     // if(!validarToken(getTokenOfHeader()))
     // return json_encode(["status"=>"SESSION_EXPIRED"]);
