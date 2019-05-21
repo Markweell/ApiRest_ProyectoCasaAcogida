@@ -1,13 +1,13 @@
 <?php
     /**
-     * Obtiene todas los parentescos de la tabla t_parentescos.
+     * Obtiene todos los apoyos sociales
      * @return Object con un status que define el exito o fracaso de la operación. Si la operación tuvo éxito este objeto tiene un clave 'data' con el resultado de la consulta.
      */
-    function obtenerTipoApoyoSocial($response, $request, $next){
+    function obtenerApoyosSociales($response, $request, $next){
         if(!validarToken(getTokenOfHeader()))
             return json_encode(["status"=>"SESSION_EXPIRED"]);
         $conexion = \Conexion::getConnection();
-        $consulta = $conexion->prepare('SELECT e_apoyo_social.id, e_apoyo_social.apoyo_social, e_tipo_apoyo_social.id as "idTipo", e_tipo_apoyo_social.tipo FROM `e_apoyo_social`,e_tipo_apoyo_social WHERE e_apoyo_social.id_tipo_apoyo_social = e_tipo_apoyo_social.id');
+        $consulta = $conexion->prepare('SELECT * FROM e_apoyo_social');
         $consulta->execute();
         $resultadoBusqueda=$consulta->fetchAll();
         if($resultadoBusqueda)

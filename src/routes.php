@@ -64,6 +64,7 @@ $app->group('/api', function () use ($app) {
         $app->get('/obtenerExpedientesEvaluacionDePersonasEnCasa', 'obtenerExpedientesEvaluacionDePersonasEnCasa');
         $app->get('/obtenerDatosParentesco', 'obtenerDatosParentesco');
         $app->get('/obtenerTipoApoyoSocial', 'obtenerTipoApoyoSocial');
+        $app->get('/obtenerApoyosSociales', 'obtenerApoyosSociales');
         $app->post('/prueba','pruebasPhp'); //Usado para pruebas
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');
