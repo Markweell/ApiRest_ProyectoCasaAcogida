@@ -10,6 +10,8 @@ require_once "constants.php";
 
 //GET
 require 'routesFunction/obtenerFichasPersonales.php';
+require 'routesFunction/obtenerSexosEv.php';
+require 'routesFunction/obtenerOrientacionSexual.php';
 require 'routesFunction/obtenerTiposDocumentos.php';
 require 'routesFunction/obtenerPaises.php';
 require 'routesFunction/obtenerSexos.php';
@@ -53,6 +55,8 @@ $app->group('/api', function () use ($app) {
         $app->get('/obtenerFichasPersonales', 'obtenerFichasPersonales');
         $app->get('/obtenerTiposAusenciaDocumento','obtenerTiposAusenciaDocumento');
         $app->get('/obtenerFormasIngreso','obtenerFormasIngreso');
+        $app->get('/obtenerSexosEv','obtenerSexosEv');
+        $app->get('/obtenerOrientacionSexual','obtenerOrientacionSexual');
         $app->get('/obtenerOrigenIngreso','obtenerOrigenIngreso');
         $app->get('/getRandomToken','getRandomToken'); //Usado para pruebas
         $app->get('/obtenerTiposDocumentos', 'obtenerTiposDocumentos');
