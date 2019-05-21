@@ -21,6 +21,7 @@ require 'routesFunction/obtenerExpedientesEvaluacionDePersonasEnCasa.php';
 require 'routesFunction/obtenerDatosParentesco.php';
 require 'routesFunction/obtenerFormasIngreso.php';
 require 'routesFunction/obtenerOrigenIngreso.php';
+require 'routesFunction/obtenerTiposAusenciaDocumento.php';
 //POST
 require 'routesFunction/pruebasPhp.php'; // esta hay que borrarla
 require 'routesFunction/forgotPassword.php';
@@ -50,6 +51,7 @@ $app->group('/api', function () use ($app) {
     $app->group('/v1', function () use ($app) {
 
         $app->get('/obtenerFichasPersonales', 'obtenerFichasPersonales');
+        $app->get('/obtenerTiposAusenciaDocumento','obtenerTiposAusenciaDocumento');
         $app->get('/obtenerFormasIngreso','obtenerFormasIngreso');
         $app->get('/obtenerOrigenIngreso','obtenerOrigenIngreso');
         $app->get('/getRandomToken','getRandomToken'); //Usado para pruebas
