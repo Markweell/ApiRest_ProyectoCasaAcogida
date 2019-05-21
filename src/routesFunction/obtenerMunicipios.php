@@ -11,6 +11,8 @@
         $consulta = $conexion->prepare('SELECT * FROM t_poblaciones WHERE idProvincia = :idProvincia');
         $consulta->execute([":idProvincia"=>$resp->idProvincia]);
         $resultadoBusqueda=$consulta->fetchAll();
-        return json_encode(["status"=>"OPERATION_SUCCESS", "data" => $resultadoBusqueda]);
+        if($resultadoBusqueda)
+            return json_encode(["status"=>"OPERATION_SUCCESS", "data" => $resultadoBusqueda]);
+        return json_encode(["status"=>"DATA_EMPTY"]);
     }
 ?>
