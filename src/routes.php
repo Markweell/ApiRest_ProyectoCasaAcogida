@@ -22,6 +22,8 @@ require 'routesFunction/obtenerDatosParentesco.php';
 require 'routesFunction/obtenerFormasIngreso.php';
 require 'routesFunction/obtenerOrigenIngreso.php';
 require 'routesFunction/obtenerTiposAusenciaDocumento.php';
+require 'routesFunction/obtenerTipoApoyoSocial.php';
+require 'routesFunction/obtenerApoyosSociales.php';
 //POST
 require 'routesFunction/pruebasPhp.php'; // esta hay que borrarla
 require 'routesFunction/forgotPassword.php';
@@ -39,7 +41,6 @@ require 'routesFunction/agregarNuevaSalida.php';
 require 'routesFunction/cambiarCama.php';
 require 'routesFunction/obtenerProvincias.php';
 require 'routesFunction/obtenerMunicipios.php';
-require 'routesFunction/obtenerTipoApoyoSocial.php';
 
 use Slim\Http\Request;
 use Slim\Http\Response;

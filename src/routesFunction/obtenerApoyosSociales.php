@@ -7,7 +7,7 @@
         if(!validarToken(getTokenOfHeader()))
             return json_encode(["status"=>"SESSION_EXPIRED"]);
         $conexion = \Conexion::getConnection();
-        $consulta = $conexion->prepare('SELECT * FROM e_apoyo_social');
+        $consulta = $conexion->prepare('SELECT e_apoyo_social.id, e_apoyo_social.apoyo_social, e_tipo_apoyo_social.id as "idTipo", e_tipo_apoyo_social.tipo FROM `e_apoyo_social`,e_tipo_apoyo_social WHERE e_apoyo_social.id_tipo_apoyo_social = e_tipo_apoyo_social.id');
         $consulta->execute();
         $resultadoBusqueda=$consulta->fetchAll();
         if($resultadoBusqueda)
