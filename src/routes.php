@@ -24,6 +24,8 @@ require 'routesFunction/obtenerDatosParentesco.php';
 require 'routesFunction/obtenerFormasIngreso.php';
 require 'routesFunction/obtenerOrigenIngreso.php';
 require 'routesFunction/obtenerTiposAusenciaDocumento.php';
+require 'routesFunction/obtenerTipoApoyoSocial.php';
+require 'routesFunction/obtenerApoyosSociales.php';
 //POST
 require 'routesFunction/pruebasPhp.php'; // esta hay que borrarla
 require 'routesFunction/forgotPassword.php';
@@ -68,6 +70,8 @@ $app->group('/api', function () use ($app) {
         $app->get('/obtenerOcupacion', 'obtenerOcupacion');
         $app->get('/obtenerExpedientesEvaluacionDePersonasEnCasa', 'obtenerExpedientesEvaluacionDePersonasEnCasa');
         $app->get('/obtenerDatosParentesco', 'obtenerDatosParentesco');
+        $app->get('/obtenerTipoApoyoSocial', 'obtenerTipoApoyoSocial');
+        $app->get('/obtenerApoyosSociales', 'obtenerApoyosSociales');
         $app->post('/prueba','pruebasPhp'); //Usado para pruebas
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');

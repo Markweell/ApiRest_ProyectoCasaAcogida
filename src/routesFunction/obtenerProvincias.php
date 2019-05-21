@@ -11,6 +11,8 @@
         $consulta = $conexion->prepare('SELECT * FROM t_provincias WHERE idPais = :idPais');
         $consulta->execute([":idPais"=>$resp->idPais]);
         $resultadoBusqueda=$consulta->fetchAll();
-        return json_encode(["status"=>"OPERATION_SUCCESS", "data" => $resultadoBusqueda]);
+        if($resultadoBusqueda)
+            return json_encode(["status"=>"OPERATION_SUCCESS", "data" => $resultadoBusqueda]);
+        return json_encode(["status"=>"DATA_EMPTY"]);
     }
 ?>
