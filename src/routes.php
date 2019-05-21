@@ -38,6 +38,7 @@ require 'routesFunction/agregarNuevaSalida.php';
 require 'routesFunction/cambiarCama.php';
 require 'routesFunction/obtenerProvincias.php';
 require 'routesFunction/obtenerMunicipios.php';
+require 'routesFunction/obtenerTipoApoyoSocial.php';
 
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -62,6 +63,7 @@ $app->group('/api', function () use ($app) {
         $app->get('/obtenerOcupacion', 'obtenerOcupacion');
         $app->get('/obtenerExpedientesEvaluacionDePersonasEnCasa', 'obtenerExpedientesEvaluacionDePersonasEnCasa');
         $app->get('/obtenerDatosParentesco', 'obtenerDatosParentesco');
+        $app->get('/obtenerTipoApoyoSocial', 'obtenerTipoApoyoSocial');
         $app->post('/prueba','pruebasPhp'); //Usado para pruebas
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');

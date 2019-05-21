@@ -11,7 +11,7 @@ function obtenerExpedientesEvaluacionDePersonasEnCasa($response, $request, $next
     $jsonAEnviar = [];
     $personasEnCasa = getPersonasEnCasa($conexion);
     if (!$personasEnCasa) {
-        return;
+        return json_encode(["status"=>"DATA_EMPTY"]);
     }
     
     foreach ($personasEnCasa as $persona) {
