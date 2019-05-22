@@ -8,6 +8,7 @@
         $consulta = $conexion->prepare(
             'SELECT 
             fichas_personas.*,
+            fichas_personas.idNacionalidad as nacionalidad,
             expedientes_evaluacion.*,
             registro.*
         FROM expedientes_evaluacion 
