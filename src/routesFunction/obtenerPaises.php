@@ -4,8 +4,8 @@
      * @return Object con un status que define el exito o fracaso de la operación. Si la operación tuvo éxito este objeto tiene un clave 'data' con el resultado de la consulta.
      */
     function obtenerPaises($response, $request, $next){
-        if(!validarToken(getTokenOfHeader()))
-            return json_encode(["status"=>"SESSION_EXPIRED"]);
+        // if(!validarToken(getTokenOfHeader()))
+        //     return json_encode(["status"=>"SESSION_EXPIRED"]);
         $conexion = \Conexion::getConnection();
         $consulta = $conexion->prepare('SELECT * FROM t_paises');
         $consulta->execute();
