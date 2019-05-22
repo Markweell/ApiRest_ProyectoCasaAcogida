@@ -10,6 +10,8 @@ require_once "constants.php";
 
 //GET
 require 'routesFunction/obtenerFichasPersonales.php';
+require 'routesFunction/obtenerEstadosCiviles.php';
+require 'routesFunction/obtenerPermisosResidencia.php';
 require 'routesFunction/obtenerSexosEv.php';
 require 'routesFunction/obtenerOrientacionSexual.php';
 require 'routesFunction/obtenerTiposDocumentos.php';
@@ -29,6 +31,7 @@ require 'routesFunction/obtenerApoyosSociales.php';
 //POST
 require 'routesFunction/pruebasPhp.php'; // esta hay que borrarla
 require 'routesFunction/forgotPassword.php';
+require 'routesFunction/obtenerInformacionExpediente.php';
 require 'routesFunction/validateToken.php';
 require 'routesFunction/changePassword.php';
 require 'routesFunction/validateLogin.php';
@@ -56,6 +59,8 @@ $app->group('/api', function () use ($app) {
 
         $app->get('/obtenerFichasPersonales', 'obtenerFichasPersonales');
         $app->get('/obtenerTiposAusenciaDocumento','obtenerTiposAusenciaDocumento');
+        $app->get('/obtenerPermisosResidencia','obtenerPermisosResidencia');
+        $app->get('/obtenerEstadosCiviles','obtenerEstadosCiviles');
         $app->get('/obtenerFormasIngreso','obtenerFormasIngreso');
         $app->get('/obtenerSexosEv','obtenerSexosEv');
         $app->get('/obtenerOrientacionSexual','obtenerOrientacionSexual');
@@ -77,6 +82,7 @@ $app->group('/api', function () use ($app) {
         $app->post('/validateToken', 'validateToken');
         $app->post('/changePassword', 'changePassword');
         $app->post('/validateLogin', 'validateLogin');
+        $app->post('/obtenerInformacionExpediente', 'obtenerInformacionExpediente');
         $app->post('/agregarFichaPersonal','agregarFichaPersonal');
         $app->post('/obtenerFichaPersonal','obtenerFichaPersonal');
         $app->post('/obtenerFichasPersonalesPorFechaDeCreacion','obtenerFichasPersonalesPorFechaDeCreacion');
