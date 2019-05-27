@@ -31,6 +31,15 @@ require 'routesFunction/obtenerApoyosSociales.php';
 require 'routesFunction/obtenerMotivosDeEstanciaCentro.php';
 require 'routesFunction/obtenerCentrosSociales.php';
 require 'routesFunction/obtenerCentrosSocialesRedCohabita.php';
+require 'routesFunction/obtenerTiposNivelEducacion.php';
+require 'routesFunction/obtenerTiposSituacionLaboral.php';
+require 'routesFunction/obtenerTiempoDesempleado.php';
+require 'routesFunction/obtenerContratoLaboral.php';
+require 'routesFunction/obtenerTipoContratoLaboral.php';
+require 'routesFunction/obtenerPrincipalOcupacion.php';
+require 'routesFunction/obtenerTiposIngresosEconomicos.php';
+require 'routesFunction/obtenerTiposDeBeneficios.php';
+require 'routesFunction/obtenerCuantiasEconomicas.php';
 
 //POST
 require 'routesFunction/pruebasPhp.php'; // esta hay que borrarla
@@ -84,6 +93,15 @@ $app->group('/api', function () use ($app) {
         $app->get('/obtenerMotivosDeEstanciaCentro', 'obtenerMotivosDeEstanciaCentro');
         $app->get('/obtenerCentrosSociales', 'obtenerCentrosSociales');
         $app->get('/obtenerCentrosSocialesRedCohabita', 'obtenerCentrosSocialesRedCohabita');
+        $app->get('/obtenerTiposNivelEducacion', 'obtenerTiposNivelEducacion');
+        $app->get('/obtenerTiposSituacionLaboral', 'obtenerTiposSituacionLaboral');
+        $app->get('/obtenerTiempoDesempleado', 'obtenerTiempoDesempleado');
+        $app->get('/obtenerContratoLaboral', 'obtenerContratoLaboral');
+        $app->get('/obtenerTipoContratoLaboral', 'obtenerTipoContratoLaboral');
+        $app->get('/obtenerPrincipalOcupacion', 'obtenerPrincipalOcupacion');
+        $app->get('/obtenerTiposIngresosEconomicos', 'obtenerTiposIngresosEconomicos');
+        $app->get('/obtenerTiposDeBeneficios', 'obtenerTiposDeBeneficios');
+        $app->get('/obtenerCuantiasEconomicas', 'obtenerCuantiasEconomicas');
         $app->post('/prueba','pruebasPhp'); //Usado para pruebas
         $app->post('/forgotPassword', 'forgotPassword');
         $app->post('/validateToken', 'validateToken');

@@ -26,7 +26,7 @@ use PHPMailer\PHPMailer\Exception;
         <p> Para confirmar y restablecer su contraseña, por favor haga click
         <a href="http://localhost:4200/change_password/'.$token.'">aquí</a> 
         o accede a la siguiente dirección: 
-        <a href="http://localhost:4200/change_password/'.$token.'">http://localhost:4200/change_password/'.$token.'</a>. 
+        <a href="http://localhost:4200/change_password/'.$token.'">http://'.URL.'/change_password/'.$token.'</a>. 
         Si no has iniciado esta solicitud, ignore este mensaje.</p>
         <p>Saludos</p>';
        
