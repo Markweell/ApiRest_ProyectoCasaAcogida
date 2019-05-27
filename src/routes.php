@@ -10,6 +10,10 @@ require_once "constants.php";
 
 //GET
 require 'routesFunction/obtenerFichasPersonales.php';
+require 'routesFunction/obtenerConsecuenciasAgresion.php';
+require 'routesFunction/obtenerMomentosAgresion.php';
+require 'routesFunction/obtenerTiposViolencia.php';
+require 'routesFunction/obtenerLugaresAgresion.php';
 require 'routesFunction/obtenerEstadosCiviles.php';
 require 'routesFunction/obtenerPermisosResidencia.php';
 require 'routesFunction/obtenerSexosEv.php';
@@ -71,6 +75,12 @@ $app->group('/api', function () use ($app) {
     $app->group('/v1', function () use ($app) {
 
         $app->get('/obtenerFichasPersonales', 'obtenerFichasPersonales');
+        $app->get('/obtenerConsecuenciasAgresionFisicas', 'obtenerConsecuenciasAgresionFisicas');
+        $app->get('/obtenerConsecuenciasAgresionPsicologicas', 'obtenerConsecuenciasAgresionPsicologicas');
+        $app->get('/obtenerConsecuenciasAgresionSocioEconomicas', 'obtenerConsecuenciasAgresionSocioEconomicas');
+        $app->get('/obtenerMomentosAgresion', 'obtenerMomentosAgresion');
+        $app->get('/obtenerLugaresAgresion', 'obtenerLugaresAgresion');
+        $app->get('/obtenerTiposViolencia', 'obtenerTiposViolencia');
         $app->get('/obtenerTiposAusenciaDocumento','obtenerTiposAusenciaDocumento');
         $app->get('/obtenerPermisosResidencia','obtenerPermisosResidencia');
         $app->get('/obtenerEstadosCiviles','obtenerEstadosCiviles');
