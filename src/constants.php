@@ -10,6 +10,7 @@ const EXPIRE_TIME_EMAIL = 3600;
 const EXPIRE_TIME_SESSION = 7200;
 
 //URL de la imagen guardada en el servidor
-//const URL_IMAGE = 'http://localhost/api/public/';
-const URL = 'http://cpd.iesgrancapitan.org:9123';
-const URL_IMAGE = 'http://cpd.iesgrancapitan.org:9123/api/public/';
+const URL = 'http://localhost/';
+const URL_IMAGE = 'http://localhost/api/public/';
+// const URL = 'http://cpd.iesgrancapitan.org:9123/';
+// const URL_IMAGE = 'http://cpd.iesgrancapitan.org:9123/api/public/';
