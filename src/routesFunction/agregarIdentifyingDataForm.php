@@ -1,6 +1,6 @@
 <?php
     /**
-     * Registra una ficha personal
+     * Recibe los datos mandados por el primer formulario, y hace los update en la base de datos correspondientes.
      */
     function agregarIdentifyingDataForm($response, $request, $next){
         if(!validarToken(getTokenOfHeader()))
@@ -10,6 +10,7 @@
         $resp = json_decode($response->getBody());
         
         $idTecnico = getIdOfToken(getTokenOfHeader());
+
         $valoresFichasPersonas = [":id_expediente"=>$resp->id_expediente,
                                     ":nombre"=>$resp->nombre,
                                     ":apellido1"=>$resp->apellido1,
@@ -28,6 +29,7 @@
                                     ":numeroSS"=>$resp->numeroSS,
                                     ":estadoCivil"=>$resp->estadoCivil
                                 ];
+
         $valoresExpedientesPersonales = [":id_expediente"=>$resp->id_expediente,
                                         ":fechaExpediente"=>$resp->fechaExpediente,
                                         ":formaIngreso"=>$resp->formaIngreso,
@@ -40,7 +42,9 @@
                                         ":sexoEv"=>$resp->sexoEv,
                                         ":orientacionSexual"=>$resp->orientacionSexual,
                                         ":numeroSS"=>$resp->numeroSS,
-                                        ":estadoCivil"=>$resp->estadoCivil];
+                                        ":estadoCivil"=>$resp->estadoCivil
+                                    ];
+
         if($valoresExpedientesPersonales[':formaIngreso']=='1'){
             $valoresExpedientesPersonales[':origenIngreso']=null;
         }
@@ -53,27 +57,17 @@
             "tarjetaSanitaria"=>$resp->tarjetaSanitaria,
             "motivoAusenciaTarjetaSanitaria"=>$resp->motivoAusenciaTarjetaSanitaria
         ];
-        //return json_encode($valoresDocumentosIdentificacion);
-
 
         updateFichasPersonasFromIdentifyingDataForm($conexion,$valoresFichasPersonas);
         updateExpedientesFromIdentifyingDataForm($conexion, $valoresExpedientesPersonales);
-        return json_encode(['respuesta'=>updateExpedientesFromIdentifyingDataForm($conexion,$valoresExpedientesPersonales), 'datos'=> $valoresExpedientesPersonales]);
-        //$valores = obtenerDatosIdentifyingDataForm($response);
-        // $valoresCreated = getDatosCreatedAndUpdated(); 
-        // $id_ficha_personal = getLastIdFichaPersonal($conexion);
-        // $urlImagen = getUrlImagen($valores['image'], $id_ficha_personal);
-
-        // if(
-        //     insertarUsuario($valores,$valoresCreated, $conexion, $urlImagen) &
-        //     agregaDocumentacionUsuario($valores, $valoresCreated, $conexion, $id_ficha_personal)){
-        //         return json_encode(["status"=>"OPERATION_SUCCESS", "data"=>["id"=>$id_ficha_personal, 
-        //         "name"=> $valores['nombre'].' '.$valores['apellido1'].' '.$valores['apellido2']]]);
-        // }else
-        //     return json_encode(["status"=>"OPERATION_ERROR"]);
+        updateIdentificationDocumentFromIdentifyingDataForm($conexion, $valoresDocumentosIdentificacion);
+        return json_encode(
+                ['updateFichasPersonas'=>updateFichasPersonasFromIdentifyingDataForm($conexion,$valoresFichasPersonas),
+                'updateExpedientes'=>updateExpedientesFromIdentifyingDataForm($conexion, $valoresExpedientesPersonales),
+                'updateDocumentacion'=>updateIdentificationDocumentFromIdentifyingDataForm($conexion, $valoresDocumentosIdentificacion)]
+            );
+       
     }
-    // fichas_personas.fecha_nacimiento = :fechaNacimiento,
-    // fichas_personas.fecha_empadronamiento = :fechaEmpadronamiento,
     
     function updateFichasPersonasFromIdentifyingDataForm($conexion,$valoresFichasPersonas){
         $consulta = $conexion->prepare("UPDATE fichas_personas, expedientes_evaluacion, registro SET
@@ -96,7 +90,8 @@
                                           WHERE fichas_personas.id =
                                             (SELECT registro.idFichaPersona WHERE registro.id =
                                                 (SELECT expedientes_evaluacion.idRegistro WHERE expedientes_evaluacion.id = :id_expediente))");
-        return $consulta->execute($valoresFichasPersonas);
+        $consulta->execute($valoresFichasPersonas);
+        return $consulta->errorInfo();
     }
     function updateExpedientesFromIdentifyingDataForm($conexion,$valoresExpedientesPersonales){
         $consulta = $conexion->prepare("UPDATE expedientes_evaluacion SET
@@ -117,78 +112,10 @@
         return $consulta->errorInfo();
     }
 
-    /**
-     * Obtiene los datos que le llegan a la petición post y los devuelve como un array.
-     */
-    function obtenerDatosIdentifyingDataForm($response){
-        $resp = json_decode($response->getBody());
-        $nombre = $resp->nombre ;              
-        $apellido1 = $resp->apellido1;
-        $apellido2 = $resp->apellido2 ? $resp->apellido2 : '';
-        $fechaNacimiento = $resp->fechaNacimiento ? $resp->fechaNacimiento : null;
-        $lugarNacimiento = $resp->lugarNacimiento ? $resp->lugarNacimiento : null;
-        $sexo = $resp->sexo ? $resp->sexo : null;
-        $nacionalidad = $resp->nacionalidad ? $resp->nacionalidad : null;
-        $document = $resp->document ? $resp->document : null;
-        $documentType = $resp->documentType ? $resp->documentType : null;
-        $observaciones = $resp->observaciones ? $resp->observaciones : null;
-        $image = $resp->image;
-
-        return ['nombre'=>$nombre,'apellido1'=>$apellido1 ,'apellido2'=>$apellido2,'fechaNacimiento'=>$fechaNacimiento,
-        'lugarNacimiento'=>$lugarNacimiento,'sexo'=>$sexo,'nacionalidad'=>$nacionalidad,'document'=>$document,
-        'documentType'=>$documentType,'observaciones'=>$observaciones, 'image'=>$image];
-        // return ['nombre'=>capitalize($nombre),'apellido1'=>capitalize($apellido1) ,'apellido2'=>capitalize($apellido2),'fechaNacimiento'=>$fechaNacimiento,
-        // 'lugarNacimiento'=>$lugarNacimiento,'sexo'=>$sexo,'nacionalidad'=>$nacionalidad,'document'=>$document,
-        // 'documentType'=>$documentType,'observaciones'=>$observaciones, 'image'=>$image];
+    function updateIdentificationDocumentFromIdentifyingDataForm($conexion, $valoresDocumentosIdentificacion){
+        // $consulta = $conexion->prepare("");
+        // $consulta->execute($valoresDocumentosIdentificacion);
+        // return $consulta->errorInfo();
     }
-    
-    // /**
-    //  * Obtiene el último id de la tabla ficha_personal
-    //  */
-    // function getLastIdFichaPersonal($conexion){
-    //     $res=$conexion->prepare("SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'api_proyecto_php' AND TABLE_NAME = 'fichas_personas'");
-    //     $res->execute();
-    //     $rows = $res->fetch();
-    //     return $rows['AUTO_INCREMENT'];
-    // }
-
-    // /**
-    //  * Inserta una ficha personal en la base de datos
-    //  */
-    // function insertarUsuario($valores, $valoresCreated, $conexion, $urlImagen){
-
-    //     $valoresConsulta = [":nombre"=>$valores['nombre'], ":apellido1"=>$valores['apellido1'],
-    //     ":apellido2"=>$valores['apellido2'],":fechaNacimiento"=>$valores['fechaNacimiento'],
-    //     ":lugarNacimiento"=>$valores['lugarNacimiento'],":sexo"=>$valores['sexo'],
-    //     ":nacionalidad"=>$valores['nacionalidad'],":observaciones"=>$valores['observaciones'],
-    //     ":image"=>$urlImagen, ":created_at"=>$valoresCreated['date'],
-    //     ":idUsuario_created_at"=>$valoresCreated["user"]];
-
-    //     $consulta = $conexion->prepare('INSERT INTO fichas_personas(apellido1,apellido2,nombre,
-    //     fecha_nacimiento,image,idNacionalidad,idPaisNacimiento,idSexo,observaciones,created_at,
-    //     idUsuario_created_at,updated_at, idUsuario_updated_at) 
-    //     VALUES (:apellido1,:apellido2,:nombre,:fechaNacimiento,:image,:nacionalidad,:lugarNacimiento,
-    //     :sexo,:observaciones,:created_at,:idUsuario_created_at,:created_at,:idUsuario_created_at)');
-
-    //     return $consulta->execute($valoresConsulta); 
-    // }
-
-    // function agregaDocumentacionUsuario($valores, $valoresCreated,$conexion,$id_ficha_personal){
-    //     if($valores['document'] == [""] || $valores['documentType'] == [""]){
-    //         return true;
-    //     }
-    //     foreach($valores['document'] as $key=>$document){
-    //         $valoresConsulta = [':idFichaPersonal'=>$id_ficha_personal,':documentType'=>$valores['documentType'][$key],
-    //         ':document'=>$document, ':created_at'=>$valoresCreated['date'], ":idUsuario_created_at"=>$valoresCreated["user"] ];
-    //         $consulta = $conexion->prepare('INSERT INTO inf_id_documentacion(idFichaPersonal, idTipoDocumento,
-    //         numero_documento, created_at, updated_at, idUsuario_created_at, idUsuario_updated_at) 
-    //         VALUES (:idFichaPersonal, :documentType, :document, :created_at, :created_at, :idUsuario_created_at, :idUsuario_created_at)');
-    //         if(!($consulta->execute($valoresConsulta))){
-    //             return false;
-    //         }
-    //     }
-    //     return true; 
-
-    // }
 
 ?>
