@@ -14,7 +14,7 @@
         //Descomentar si usamos contraseña encriptada
         // $valores = [":email"=>$email];
         //Comentar si usamos contraseña encriptada
-        $consulta = $conexion->prepare('SELECT * FROM usuarios, tipo_usuario where usuarios.tipo_usuario_id = tipo_usuario.id AND email = :email and password = :password');
+        $consulta = $conexion->prepare('SELECT usuarios.*, tipo_usuario.tipo FROM usuarios, tipo_usuario where usuarios.tipo_usuario_id = tipo_usuario.id AND email = :email and password = :password');
         //Descomentar si usamos contraseña encriptada
         // $consulta = $conexion->prepare('SELECT * FROM usuarios where email = :email');
         $consulta->execute($valores);

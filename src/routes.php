@@ -49,6 +49,7 @@ require 'routesFunction/obtenerInformeIngresosPorSexo.php';
 
 //POST
 require 'routesFunction/pruebasPhp.php'; // esta hay que borrarla
+require 'routesFunction/agregarIdentifyingDataForm.php';
 require 'routesFunction/forgotPassword.php';
 require 'routesFunction/obtenerInformacionExpediente.php';
 require 'routesFunction/validateToken.php';
@@ -126,6 +127,7 @@ $app->group('/api', function () use ($app) {
         $app->post('/validateLogin', 'validateLogin');
         $app->post('/obtenerInformacionExpediente', 'obtenerInformacionExpediente');
         $app->post('/agregarFichaPersonal','agregarFichaPersonal');
+        $app->post('/agregarIdentifyingDataForm','agregarIdentifyingDataForm');
         $app->post('/obtenerFichaPersonal','obtenerFichaPersonal');
         $app->post('/obtenerFichasPersonalesPorFechaDeCreacion','obtenerFichasPersonalesPorFechaDeCreacion');
         $app->post('/obtenerFichasPersonalesPorFechaDeEntrada','obtenerFichasPersonalesPorFechaDeEntrada');
