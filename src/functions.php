@@ -178,3 +178,11 @@ function insertarCama($valores, $idRegistro, $conexion){
     return $consulta->execute($valoresConsulta);
 }
 
+function obtenerIdFichaPersonalByExpediente($conexion, $id_expediente){
+    $consulta = $conexion->prepare("SELECT registro.idFichaPersona 
+                                    FROM registro WHERE registro.id = 
+                                        (SELECT expedientes_evaluacion.idRegistro FROM expedientes_evaluacion 
+                                        WHERE expedientes_evaluacion.id = :idExpediente)");
+    $consulta->execute([":idExpediente"=>$id_expediente]);
+    return $consulta->fetch()["idFichaPersona"];
+}
