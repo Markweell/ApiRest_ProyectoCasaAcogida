@@ -52,19 +52,18 @@
             $valoresExpedientesPersonales[':fechaExpediente'] = date("Y-m-d");
         }
         $valoresDocumentosIdentificacion=[
+            "id_expediente"=>$resp->id_expediente,
             "documentacion"=>$resp->documentacion,
             "documentacionPerdida"=>$resp->documentacionPerdida,
             "tarjetaSanitaria"=>$resp->tarjetaSanitaria,
             "motivoAusenciaTarjetaSanitaria"=>$resp->motivoAusenciaTarjetaSanitaria
         ];
 
-        updateFichasPersonasFromIdentifyingDataForm($conexion,$valoresFichasPersonas);
-        updateExpedientesFromIdentifyingDataForm($conexion, $valoresExpedientesPersonales);
-        updateIdentificationDocumentFromIdentifyingDataForm($conexion, $valoresDocumentosIdentificacion);
-        return json_encode(
-                ['updateFichasPersonas'=>updateFichasPersonasFromIdentifyingDataForm($conexion,$valoresFichasPersonas),
+        return json_encode([
+                'updateFichasPersonas'=>updateFichasPersonasFromIdentifyingDataForm($conexion,$valoresFichasPersonas),
                 'updateExpedientes'=>updateExpedientesFromIdentifyingDataForm($conexion, $valoresExpedientesPersonales),
-                'updateDocumentacion'=>updateIdentificationDocumentFromIdentifyingDataForm($conexion, $valoresDocumentosIdentificacion)]
+                'updateDocumentacion'=>updateIdentificationDocumentFromIdentifyingDataForm($conexion, $valoresDocumentosIdentificacion,$idTecnico),
+                'arrayDocumentacion' => $valoresDocumentosIdentificacion]
             );
        
     }
@@ -112,10 +111,128 @@
         return $consulta->errorInfo();
     }
 
-    function updateIdentificationDocumentFromIdentifyingDataForm($conexion, $valoresDocumentosIdentificacion){
-        // $consulta = $conexion->prepare("");
-        // $consulta->execute($valoresDocumentosIdentificacion);
-        // return $consulta->errorInfo();
+    function updateIdentificationDocumentFromIdentifyingDataForm($conexion, $valoresDocumentosIdentificacion, $idTecnico){
+        $id_expediente = $valoresDocumentosIdentificacion["id_expediente"];
+        $documentacionQuePosee = obtenerIdDocumentacionDelExpediente($conexion, $id_expediente);
+        $idFichaPersonal = obtenerIdFichaPersonalByExpediente($conexion, $id_expediente);
+        $respuestaBD = array();
+        
+        if(isset($valoresDocumentosIdentificacion["documentacion"]->documentacion)){
+            foreach( $valoresDocumentosIdentificacion["documentacion"]->documentacion as $documento){
+                if(in_array($documento->tipo, $documentacionQuePosee)){
+                    $consulta = $conexion->prepare("UPDATE inf_id_documentacion set 
+                                                inf_id_documentacion.numero_documento = :numero,
+                                                inf_id_documentacion.idTipoAusenciaDocumento = null,
+                                                inf_id_documentacion.numero_denuncia = null 
+                                                WHERE inf_id_documentacion.idTipoDocumento = :tipo 
+                                                AND inf_id_documentacion.idFichaPersonal = 
+                                                    (SELECT registro.idFichaPersona FROM registro WHERE registro.id = 
+                                                        (SELECT expedientes_evaluacion.idRegistro FROM expedientes_evaluacion WHERE id = :id_expediente))");
+                                                 
+                    $consulta->execute([":numero"=>$documento->numero, ":tipo"=>$documento->tipo, ":id_expediente"=>$id_expediente]);
+                    array_push($respuestaBD, ["respuestaPara"=>$documento->tipo, "tipoConsulta" => 'update', "respuesta"=>$consulta->errorInfo()]);
+                }else{
+                    $consulta = $conexion->prepare("INSERT INTO inf_id_documentacion (idFichaPersonal, idTipoDocumento, numero_documento, created_at, updated_at, idUsuario_created_at, idUsuario_updated_at) 
+                                                    VALUES (:idFichaPersonal, :idTipoDocumento, :numero, :idTecnico, :idTecnico, :idTecnico, :idTecnico)");   
+                    $consulta->execute([":idFichaPersonal"=>$idFichaPersonal, ":idTipoDocumento"=>$documento->tipo, ":numero"=>$documento->numero, ":idTecnico"=>$idTecnico]);
+                    array_push($respuestaBD, ["respuestaPara"=>$documento->tipo, "tipoConsulta" => 'insert', "respuesta"=>$consulta->errorInfo()]);
+                }
+            }
+        }
+
+        if(isset($valoresDocumentosIdentificacion["documentacion"]->otraDocumentacion)){
+            $tipoOtraDocumentacion = $valoresDocumentosIdentificacion["documentacion"]->otraDocumentacion->tipo;
+            $numeroOtraDocumentacion = $valoresDocumentosIdentificacion["documentacion"]->otraDocumentacion->numero;
+            $consulta = $conexion->prepare("SELECT id, documento FROM t_tipos_documento WHERE documento = :documento ");
+            $consulta->execute([":documento"=>$tipoOtraDocumentacion]);
+            $resultado = $consulta->fetch();
+
+            if($resultado){
+                $idTipoDocumento = $resultado["id"];
+            }else{
+                $consulta = $conexion->prepare("INSERT INTO t_tipos_documento(documento) values (:tipo) ");
+                $consulta->execute([":tipo"=>$tipoOtraDocumentacion]);
+                $idTipoDocumento = $conexion->lastInsertId();
+                array_push($respuestaBD, ["respuestaPara"=>$tipoOtraDocumentacion, "tipoConsulta" => 'insert', "respuesta"=>$consulta->errorInfo()]);
+            }
+
+            if(in_array($idTipoDocumento, $documentacionQuePosee)){
+                $consulta = $conexion->prepare("UPDATE inf_id_documentacion set 
+                                                inf_id_documentacion.numero_documento = :numero,
+                                                inf_id_documentacion.idTipoAusenciaDocumento = null,
+                                                inf_id_documentacion.numero_denuncia = null 
+                                                WHERE inf_id_documentacion.idTipoDocumento = :tipo 
+                                                AND inf_id_documentacion.idFichaPersonal = 
+                                                    (SELECT registro.idFichaPersona FROM registro WHERE registro.id = 
+                                                        (SELECT expedientes_evaluacion.idRegistro FROM expedientes_evaluacion WHERE id = :id_expediente))");
+                                                 
+                $consulta->execute([":numero"=>$numeroOtraDocumentacion, ":tipo"=>$idTipoDocumento, ":id_expediente"=>$id_expediente]);
+                array_push($respuestaBD, ["respuestaPara"=>$idTipoDocumento, "tipoConsulta" => 'update', "respuesta"=>$consulta->errorInfo()]);
+            }else{
+                $consulta = $conexion->prepare("INSERT INTO inf_id_documentacion (idFichaPersonal, idTipoDocumento, numero_documento, created_at, updated_at, idUsuario_created_at, idUsuario_updated_at) 
+                                                        VALUES (:idFichaPersonal, :idTipoDocumento, :numero, :idTecnico, :idTecnico, :idTecnico, :idTecnico)");   
+                $consulta->execute([":idFichaPersonal"=>$idFichaPersonal, ":idTipoDocumento"=>$idTipoDocumento, ":numero"=>$numeroOtraDocumentacion, ":idTecnico"=>$idTecnico]);
+                array_push($respuestaBD, ["respuestaPara"=>$numeroOtraDocumentacion, "tipoConsulta" => 'insert', "respuesta"=>$consulta->errorInfo()]);
+            }
+        }
+        return insertarDocumentacionPerdida($valoresDocumentosIdentificacion["documentacionPerdida"], $documentacionQuePosee, $conexion, $idFichaPersonal, $idTecnico);
+       
+        return $respuestaBD;
     }
+
+    function obtenerIdDocumentacionDelExpediente($conexion,$id_expediente){
+        $consulta = $conexion->prepare("SELECT inf_id_documentacion.idTipoDocumento FROM inf_id_documentacion WHERE inf_id_documentacion.idFichaPersonal = 
+                                (SELECT registro.idFichaPersona FROM registro WHERE registro.id =
+                                    (SELECT expedientes_evaluacion.idRegistro FROM expedientes_evaluacion WHERE id = :idExpediente))");
+        $consulta->execute([":idExpediente"=>$id_expediente]);
+        $documentacionQuePosee = $consulta->fetchAll();
+        $documentacionQuePoseeArray = array();
+        foreach ($documentacionQuePosee as $documento){
+            array_push($documentacionQuePoseeArray, $documento["idTipoDocumento"]);
+        }
+        return $documentacionQuePoseeArray;
+    }
+
+    function insertarDocumentacionPerdida($documentacionPerdida, $docQuePosee, $conexion, $idFichaPersonal, $idTecnico){
+        if(isset($documentacionPerdida)){
+            foreach($documentacionPerdida as $documento){
+                if(in_array($documento->tipo, $docQuePosee)){
+                    updateInfIdDocumentacion($conexion, null, $documento->motivoPerdida, null, $documento->tipo, $idFichaPersonal);
+                }else{
+                    $consulta = $conexion->prepare("INSERT INTO inf_id_documentacion (idFichaPersonal, idTipoDocumento, numero_documento, idTipoAusenciaDocumento, created_at, updated_at, idUsuario_created_at, idUsuario_updated_at) 
+                                    VALUES (:idFichaPersonal, :idTipoDocumento, :numero, :idTipoAusenciaDocumento, :idTecnico, :idTecnico, :idTecnico, :idTecnico)");   
+                    $consulta->execute([":idFichaPersonal"=>$idFichaPersonal,
+                                        ":idTipoDocumento"=>$documento->tipo,
+                                        ":numero"=>null,
+                                        "idTipoAusenciaDocumento"=> $documento->motivoPerdida,
+                                        ":idTecnico"=>$idTecnico]);
+                }
+            }
+        }
+    }
+    
+    function updateInfIdDocumentacion($conexion, $numeroDocumento, $idTipoAusenciaDocumento, $numero_denuncia, $idTipoDocumento, $idFichaPersonal){
+        $consulta = $conexion->prepare("UPDATE inf_id_documentacion set 
+                                        inf_id_documentacion.numero_documento = :numeroDocumento,
+                                        inf_id_documentacion.idTipoAusenciaDocumento = :motivoAusencia,
+                                        inf_id_documentacion.numero_denuncia = :numeroDenuncia
+                                        WHERE inf_id_documentacion.idTipoDocumento = :tipoDocumento 
+                                        AND inf_id_documentacion.idFichaPersonal = :idFichaPersonal");
+        $consulta->execute([
+            ":numeroDocumento"=> $numeroDocumento,
+            ":motivoAusencia"=> $idTipoAusenciaDocumento,
+            ":numeroDenuncia"=> $numero_denuncia,
+            ":tipoDocumento"=> $idTipoDocumento,
+            ":idFichaPersonal"=> $idFichaPersonal]);
+
+        return $consulta->errorInfo();
+    }
+    function insertInfIdDocumentacion($conexion){
+        $consulta = $conexion->prepare("INSERT INTO inf_id_documentacion (idFichaPersonal, idTipoDocumento, numero_documento, created_at, updated_at, idUsuario_created_at, idUsuario_updated_at) 
+                    VALUES (:idFichaPersonal, :idTipoDocumento, :numero, :idTecnico, :idTecnico, :idTecnico, :idTecnico)");   
+        $consulta->execute([":idFichaPersonal"=>$idFichaPersonal, ":idTipoDocumento"=>$idTipoDocumento, ":numero"=>$numeroOtraDocumentacion, ":idTecnico"=>$idTecnico]);
+        array_push($respuestaBD, ["respuestaPara"=>$numeroOtraDocumentacion, "tipoConsulta" => 'insert', "respuesta"=>$consulta->errorInfo()]);
+    }
+   
 
 ?>
