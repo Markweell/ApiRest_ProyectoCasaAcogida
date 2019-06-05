@@ -68,6 +68,7 @@ require 'routesFunction/obtenerProvincias.php';
 require 'routesFunction/obtenerMunicipios.php';
 require 'routesFunction/obtenerInformeIngresosPorSexoAnnio.php';
 require 'routesFunction/obtenerInformeIngresosPorSexoAnnioMes.php';
+require 'routesFunction/obtenerInformeRegistrosEntreFechas.php';
 
 
 use Slim\Http\Request;
@@ -139,6 +140,7 @@ $app->group('/api', function () use ($app) {
         $app->post('/obtenerMunicipios','obtenerMunicipios');
         $app->post('/obtenerInformeIngresosPorSexoAnnio', 'obtenerInformeIngresosPorSexoAnnio');
         $app->post('/obtenerInformeIngresosPorSexoAnnioMes', 'obtenerInformeIngresosPorSexoAnnioMes');
+        $app->post('/obtenerInformeRegistrosEntreFechas', 'obtenerInformeRegistrosEntreFechas');
     });
   });
 
