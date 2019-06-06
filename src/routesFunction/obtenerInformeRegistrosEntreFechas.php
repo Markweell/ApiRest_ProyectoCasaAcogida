@@ -18,4 +18,3 @@ function obtenerInformeRegistrosEntreFechas($response, $request, $next)
         return json_encode(["status"=>"DATA_EMPTY"]);
     return json_encode(["status"=>"OPERATION_SUCCESS","data"=> $resultadoBusqueda]);
 }
-
