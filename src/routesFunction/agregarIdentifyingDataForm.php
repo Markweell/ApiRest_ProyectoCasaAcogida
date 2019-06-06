@@ -5,13 +5,13 @@
     function agregarIdentifyingDataForm($response, $request, $next){
         if(!validarToken(getTokenOfHeader()))
             return json_encode(["status"=>"SESSION_EXPIRED"]);
-
-        $conexion = \Conexion::getConnection();
-        $resp = json_decode($response->getBody());
         
+        $conexion = \Conexion::getConnection();
+        $resp = json_decode($response->getBody()); 
         $idTecnico = getIdOfToken(getTokenOfHeader());
 
         $valoresFichasPersonas = [":id_expediente"=>$resp->id_expediente,
+                                    ":fechaExpediente"=>$resp->fechaExpediente,
                                     ":nombre"=>$resp->nombre,
                                     ":apellido1"=>$resp->apellido1,
                                     ":apellido2"=>$resp->apellido2,
@@ -25,38 +25,57 @@
                                     ":provinciaNacimiento"=>$resp->provinciaNacimiento ? $resp->provinciaNacimiento: null,
                                     ":municipioNacimiento"=>$resp->municipioNacimiento ? $resp->municipioNacimiento: null,
                                     ":sexoEv"=>$resp->sexoEv,
+                                    ":sexo"=>null,
                                     ":orientacionSexual"=>$resp->orientacionSexual,
                                     ":numeroSS"=>$resp->numeroSS,
-                                    ":estadoCivil"=>$resp->estadoCivil
+                                    ":estadoCivil"=>$resp->estadoCivil,
+                                    ":edad"=>$resp->edad,
+                                    ":tecnico"=>$idTecnico,
+                                    ":fechaActual"=>date("Y-m-d H:i:s")
                                 ];
-
+                                
         $valoresExpedientesPersonales = [":id_expediente"=>$resp->id_expediente,
-                                        ":fechaExpediente"=>$resp->fechaExpediente,
-                                        ":formaIngreso"=>$resp->formaIngreso,
-                                        ":origenIngreso"=>$resp->origenIngreso,
-                                        ":fechaEmpadronamiento"=>$resp->fechaEmpadronamiento,
-                                        ":nacionalidad"=>$resp->nacionalidad,
-                                        ":municipioEmpadronamiento"=>$resp->municipioEmpadronamiento,
-                                        ":telefono"=>$resp->telefono,
-                                        ":email"=>$resp->email,
-                                        ":sexoEv"=>$resp->sexoEv,
-                                        ":orientacionSexual"=>$resp->orientacionSexual,
-                                        ":numeroSS"=>$resp->numeroSS,
-                                        ":estadoCivil"=>$resp->estadoCivil
-                                    ];
+                                    ":fechaExpediente"=>$resp->fechaExpediente,
+                                    ":formaIngreso"=>$resp->formaIngreso,
+                                    ":origenIngreso"=>$resp->origenIngreso,
+                                    ":fechaEmpadronamiento"=>$resp->fechaEmpadronamiento,
+                                    ":nacionalidad"=>$resp->nacionalidad,
+                                    ":municipioEmpadronamiento"=>$resp->municipioEmpadronamiento,
+                                    ":telefono"=>$resp->telefono,
+                                    ":email"=>$resp->email,
+                                    ":sexoEv"=>$resp->sexoEv,
+                                    ":sexo"=>null,
+                                    ":orientacionSexual"=>$resp->orientacionSexual,
+                                    ":numeroSS"=>$resp->numeroSS,
+                                    ":estadoCivil"=>$resp->estadoCivil,
+                                    ":numeroasSNS"=>$resp->nAsistenciaSanitariaServicioNacionalSalud,
+                                    ":asistenciaSanitaria"=>$resp->asistenciaSanitaria,
+                                    ":renovacionPermisoResidencia"=>$resp->renovacionPermisoResidencia,
+                                    ":tipoPermisoResidencia"=>$resp->tipoPermisoResidencia,
+                                    ":tecnico"=>$idTecnico,
+                                    ":fechaActual"=>date("Y-m-d H:i:s")
+                                ];
 
         if($valoresExpedientesPersonales[':formaIngreso']=='1'){
             $valoresExpedientesPersonales[':origenIngreso']=null;
         }
         if($valoresExpedientesPersonales[':fechaExpediente']==''){
-            $valoresExpedientesPersonales[':fechaExpediente'] = date("Y-m-d");
+            $valoresExpedientesPersonales[':fechaExpediente'] = date("Y-m-d H:i:s");
+            $valoresFichasPersonas[':fechaExpediente'] = date("Y-m-d H:i:s");
+            updatedCampoCreated($conexion, $idTecnico, $resp->id_expediente);
+        }
+        if($valoresExpedientesPersonales[':sexoEv'] == '1' || $valoresExpedientesPersonales[':sexoEv'] == '2' || $valoresExpedientesPersonales[':sexoEv'] == '3'){
+            $valoresExpedientesPersonales[':sexo'] = 1;
+            $valoresFichasPersonas[':sexo'] = 1;
+        }elseif($valoresExpedientesPersonales[':sexoEv'] == '4' || $valoresExpedientesPersonales[':sexoEv'] == '5' || $valoresExpedientesPersonales[':sexoEv'] == '6'){
+            $valoresExpedientesPersonales[':sexo'] = 2;
+            $valoresFichasPersonas[':sexo'] = 2;
+
         }
         $valoresDocumentosIdentificacion=[
             "id_expediente"=>$resp->id_expediente,
             "documentacion"=>$resp->documentacion,
-            "documentacionPerdida"=>$resp->documentacionPerdida,
-            "tarjetaSanitaria"=>$resp->tarjetaSanitaria,
-            "motivoAusenciaTarjetaSanitaria"=>$resp->motivoAusenciaTarjetaSanitaria
+            "documentacionPerdida"=>$resp->documentacionPerdida
         ];
 
         return json_encode([
@@ -67,13 +86,26 @@
             );
        
     }
-    
+    function updatedCampoCreated($conexion, $idTecnico, $id_expediente){
+        $consulta = $conexion->prepare("UPDATE fichas_personas, expedientes_evaluacion, registro SET
+                                        expedientes_evaluacion.idUsuario_created_at = :tecnico,
+                                        expedientes_evaluacion.created_at = :fechaActual
+                                        WHERE fichas_personas.id =
+                                        (SELECT registro.idFichaPersona WHERE registro.id =
+                                            (SELECT expedientes_evaluacion.idRegistro WHERE expedientes_evaluacion.id = :id_expediente))");
+        $consulta->execute([":tecnico"=>$idTecnico,
+                            ":fechaActual"=>date("Y-m-d H:i:s"),
+                            ":id_expediente"=>$id_expediente]);
+        return $consulta->errorInfo();
+    }
     function updateFichasPersonasFromIdentifyingDataForm($conexion,$valoresFichasPersonas){
         $consulta = $conexion->prepare("UPDATE fichas_personas, expedientes_evaluacion, registro SET
                                          fichas_personas.nombre = :nombre,
                                          fichas_personas.apellido1 = :apellido1,
                                          fichas_personas.apellido2 = :apellido2,
+                                         fichas_personas.fecha_evaluacion = :fechaExpediente, 
                                          fichas_personas.fecha_nacimiento = :fechaNacimiento,
+                                         fichas_personas.edad = :edad,
                                          fichas_personas.fecha_empadronamiento = :fechaEmpadronamiento,
                                          fichas_personas.telefono = :telefono,
                                          fichas_personas.email = :email,
@@ -83,9 +115,12 @@
                                          fichas_personas.idProvinciaNacimiento = :provinciaNacimiento,
                                          fichas_personas.idPoblacionNacimiento = :municipioNacimiento,
                                          fichas_personas.idSexoEv = :sexoEv,
+                                         fichas_personas.idSexo = :sexo,
                                          fichas_personas.idOrientacionSexual = :orientacionSexual,
                                          fichas_personas.numero_ss = :numeroSS,
-                                         fichas_personas.idEstadoCivil = :estadoCivil
+                                         fichas_personas.idEstadoCivil = :estadoCivil,
+                                         fichas_personas.idUsuario_updated_at = :tecnico,
+                                         fichas_personas.updated_at = :fechaActual
                                           WHERE fichas_personas.id =
                                             (SELECT registro.idFichaPersona WHERE registro.id =
                                                 (SELECT expedientes_evaluacion.idRegistro WHERE expedientes_evaluacion.id = :id_expediente))");
@@ -103,9 +138,16 @@
                                         expedientes_evaluacion.telefono = :telefono,
                                         expedientes_evaluacion.email = :email,
                                         expedientes_evaluacion.idSexoEv = :sexoEv,
+                                        expedientes_evaluacion.idSexo = :sexo,
                                         expedientes_evaluacion.idOrientacionSexual = :orientacionSexual,
                                         expedientes_evaluacion.numero_ss = :numeroSS,
-                                        expedientes_evaluacion.idEstadoCivil = :estadoCivil
+                                        expedientes_evaluacion.idEstadoCivil = :estadoCivil,
+                                        expedientes_evaluacion.idPermisoResidencia = :tipoPermisoResidencia,
+                                        expedientes_evaluacion.renovacionPermisoPermanencia = :renovacionPermisoResidencia,
+                                        expedientes_evaluacion.numero_asSNS = :numeroasSNS,
+                                        expedientes_evaluacion.asistenciaSanitaria = :asistenciaSanitaria,
+                                        expedientes_evaluacion.idUsuario_updated_at = :tecnico,
+                                        expedientes_evaluacion.updated_at = :fechaActual
                                         WHERE expedientes_evaluacion.id = :id_expediente");
         $consulta->execute($valoresExpedientesPersonales);
         return $consulta->errorInfo();
