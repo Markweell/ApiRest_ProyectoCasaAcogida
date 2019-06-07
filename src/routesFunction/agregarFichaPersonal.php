@@ -47,7 +47,7 @@
         // 'documentType'=>$documentType,'observaciones'=>$observaciones, 'image'=>$image];
     }
     /**
-     * Define la url donde se aloja la foto y construlle el nombre de la foto en base al id de la ficha personal
+     * Define la url donde se aloja la foto y construye el nombre de la foto en base al id de la ficha personal
      */
     function getUrlImagen($image, $id_ficha_personal){
         if($image==''){

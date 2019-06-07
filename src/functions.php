@@ -74,10 +74,12 @@ list(, $Base64Img) = explode(',', $Base64Img);
 //Decodificamos $Base64Img codificada en base64.
 $Base64Img = base64_decode($Base64Img);
 //escribimos la información obtenida en un archivo llamado 
-//unodepiera.png para que se cree la imagen correctamente
+//imagenPerfil.png para que se cree la imagen correctamente
 
 
 file_put_contents('image/imagenPerfil'.$id.'.'.$extension, $Base64Img);
+$imgRedimensionada = redimensionar_imagen('imagenPerfil'.$id.'.'.$extension, 'image/imagenPerfil'.$id.'.'.$extension, 400, 400);
+imagejpeg($imgRedimensionada, 'image/imagenPerfil'.$id.'.'.$extension);
 }
 function getExtension($letra){
     switch($letra){
@@ -185,4 +187,35 @@ function obtenerIdFichaPersonalByExpediente($conexion, $id_expediente){
                                         WHERE expedientes_evaluacion.id = :idExpediente)");
     $consulta->execute([":idExpediente"=>$id_expediente]);
     return $consulta->fetch()["idFichaPersona"];
+}
+function redimensionar_imagen($nombreimg, $rutaimg, $xmax, $ymax){  
+    $ext = explode(".", $nombreimg);  
+    $ext = $ext[count($ext)-1];  
+  
+    if($ext == "jpg" || $ext == "jpeg")  
+        $imagen = imagecreatefromjpeg($rutaimg);  
+    elseif($ext == "png")  
+        $imagen = imagecreatefrompng($rutaimg);  
+    elseif($ext == "gif")  
+        $imagen = imagecreatefromgif($rutaimg);  
+      
+    $x = imagesx($imagen);  
+    $y = imagesy($imagen);  
+      
+    if($x <= $xmax && $y <= $ymax){
+        return $imagen;  
+    }
+  
+    if($x >= $y) {  
+        $nuevax = $xmax;  
+        $nuevay = $nuevax * $y / $x;  
+    }  
+    else {  
+        $nuevay = $ymax;  
+        $nuevax = $x / $y * $nuevay;  
+    }  
+      
+    $img2 = imagecreatetruecolor($nuevax, $nuevay);  
+    imagecopyresized($img2, $imagen, 0, 0, 0, 0, floor($nuevax), floor($nuevay), $x, $y);
+    return $img2;   
 }
