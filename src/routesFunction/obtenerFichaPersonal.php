@@ -80,7 +80,12 @@ function obtenerFechas_ingreso($conexion,$valor){
     return ['datos'=>$datos, 'camaActual'=>$camaActual, 'habitacionActual'=>$habitacionActual, 'idRegistroCama'=>$idRegistroCama, 'idRegistro'=>$idRegistro];
 }
 function obtenerDocumentacion($conexion,$valor){
-    $consulta = $conexion->prepare('SELECT t_tipos_documento.documento, inf_id_documentacion.numero_documento FROM inf_id_documentacion, t_tipos_documento WHERE inf_id_documentacion.idFichaPersonal = :id AND inf_id_documentacion.idTipoDocumento = t_tipos_documento.id');
+    $consulta = $conexion->prepare('SELECT t_tipos_documento.documento, inf_id_documentacion.numero_documento 
+                                        FROM inf_id_documentacion, t_tipos_documento 
+                                        WHERE inf_id_documentacion.idFichaPersonal = :id 
+                                            AND inf_id_documentacion.idTipoDocumento = t_tipos_documento.id
+                                            AND inf_id_documentacion.numero_documento is not null
+                                            AND inf_id_documentacion.numero_documento != ""');
     $consulta->execute($valor);
     $resultadoMainData=$consulta->fetchAll();
     return $resultadoMainData;
