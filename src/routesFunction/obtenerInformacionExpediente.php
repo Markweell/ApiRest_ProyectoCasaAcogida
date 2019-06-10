@@ -18,11 +18,20 @@
         WHERE expedientes_evaluacion.id = :id');
         $consulta->execute($valor);
         $resultadoMainData=$consulta->fetchAll();
-        $resultadoFechas = obtenerFechas_ingreso($conexion,$valor);
-        $resultadoDocumentacion = obtenerDocumentacion($conexion,$valor);
+        $resultadoDocumentacion = obtenerDocumentacionDelExpediente($conexion,$valor);
         if($resultadoMainData)
             return json_encode(["status"=>"OPERATION_SUCCESS",
-                                "data" =>['mainData'=>$resultadoMainData]]);
+                                "data" =>['mainData'=>$resultadoMainData,'documentacion'=>$resultadoDocumentacion]]);
+    }
+    function obtenerDocumentacionDelExpediente($conexion,$valor){
+         $consulta = $conexion->prepare('SELECT *
+            FROM
+             inf_id_documentacion 
+                WHERE inf_id_documentacion.idFichaPersonal = 
+                (SELECT registro.idFichaPersona FROM registro where registro.id =
+                     (SELECT expedientes_evaluacion.idRegistro FROM expedientes_evaluacion WHERE expedientes_evaluacion.id=:id))');
+        $consulta->execute($valor);
+        return $consulta->fetchAll();
     }
 
 
