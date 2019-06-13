@@ -24,10 +24,11 @@
                                 "data" =>['mainData'=>$resultadoMainData,'documentacion'=>$resultadoDocumentacion]]);
     }
     function obtenerDocumentacionDelExpediente($conexion,$valor){
-         $consulta = $conexion->prepare('SELECT *
-            FROM
-             inf_id_documentacion 
-                WHERE inf_id_documentacion.idFichaPersonal = 
+         $consulta = $conexion->prepare('SELECT inf_id_documentacion.*, t_tipos_documento.documento
+            FROM inf_id_documentacion 
+            LEFT JOIN t_tipos_documento 
+                ON inf_id_documentacion.idTipoDocumento = t_tipos_documento.id
+            WHERE inf_id_documentacion.idFichaPersonal = 
                 (SELECT registro.idFichaPersona FROM registro where registro.id =
                      (SELECT expedientes_evaluacion.idRegistro FROM expedientes_evaluacion WHERE expedientes_evaluacion.id=:id))');
         $consulta->execute($valor);
