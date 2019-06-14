@@ -38,7 +38,7 @@ function obtenerFichaPersonal($response, $request, $next){
 }
 
 function obtenerFechas_ingreso($conexion,$valor){
-    $consulta = $conexion->prepare('SELECT * FROM `registro` WHERE idFichaPersona = :id ORDER BY `registro`.`fecha_ingreso` ASC');
+    $consulta = $conexion->prepare('SELECT registro.id, registro.fecha_ingreso, registro.fecha_salida, expedientes_evaluacion.id "idExpediente", expedientes_evaluacion.fecha_evaluacion  FROM `registro`,expedientes_evaluacion WHERE registro.id = expedientes_evaluacion.idRegistro AND idFichaPersona = :id ORDER BY `registro`.`fecha_ingreso` ASC');
     $consulta->execute($valor);
     $resultadoMainData=$consulta->fetchAll();
     $habitacionActual = '';
@@ -51,6 +51,8 @@ function obtenerFechas_ingreso($conexion,$valor){
         $fechasIngreso = [  'nRegistro'=>$key+1,
                             'fechaEntrada'=>$value['fecha_ingreso'],
                             'fechaSalida'=>$value['fecha_salida'],
+                            'idExpediente'=>$value['idExpediente'],
+                            'expedient_started'=> $value['fecha_evaluacion'],
                             'estancia'=>[]];
         $consulta = $conexion->prepare(
             'SELECT  r_registro_camas.*,camas.cama,habitaciones.habitacion FROM r_registro_camas,
