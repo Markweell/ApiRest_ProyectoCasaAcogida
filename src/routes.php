@@ -127,6 +127,7 @@ $app->group('/api', function () use ($app) {
         $app->post('/changePassword', 'changePassword');
         $app->post('/validateLogin', 'validateLogin');
         $app->post('/obtenerInformacionExpediente', 'obtenerInformacionExpediente');
+        $app->post('/obtenerInformacionExpedienteSinParametrizar', 'obtenerInformacionExpedienteSinParametrizar');
         $app->post('/agregarFichaPersonal','agregarFichaPersonal');
         $app->post('/agregarIdentifyingDataForm','agregarIdentifyingDataForm');
         $app->post('/obtenerFichaPersonal','obtenerFichaPersonal');
