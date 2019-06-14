@@ -78,7 +78,7 @@ $Base64Img = base64_decode($Base64Img);
 
 
 file_put_contents('image/imagenPerfil'.$id.'.'.$extension, $Base64Img);
-$imgRedimensionada = redimensionar_imagen('imagenPerfil'.$id.'.'.$extension, 'image/imagenPerfil'.$id.'.'.$extension, 400, 400);
+$imgRedimensionada = redimensionar_imagen('imagenPerfil'.$id.'.'.$extension, 'image/imagenPerfil'.$id.'.'.$extension, 800, 800);
 imagejpeg($imgRedimensionada, 'image/imagenPerfil'.$id.'.'.$extension);
 }
 function getExtension($letra){
